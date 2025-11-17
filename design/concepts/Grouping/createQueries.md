@@ -2,7 +2,10 @@
 [@concept-design-overview](../../background/concept-design-overview.md)
 [@Grouping.md](Grouping.md)
 
-# Can you please update Grouping.md to have the same formatting as the actions for its queries. Only output updated Grouping.md _getMembers, _getAdmins, _getRequests, and _getGroupByName queries.
+# Updated Grouping.md queries:
+
+_getMembers, _getAdmins, _getRequests, and _getGroupByName queries.
+
 # response:
 
 ```markdown
