@@ -20,3 +20,13 @@
     `removeFriend (remover: User, removed: User)`
       **requires** `remover` and `removed` are friends.
       **effects** Removes the pair `{remover, removed}` from the `friends` set.
+
+*   **queries**
+    `_getAllFriendRequests (user:User):User[]`
+      **effects** returns list of requestees for user
+
+    `_getAllFriends (user:User):User[]`
+      **effects** returns list of friends for user
+
+    `_areTheyFriends(user1:User, user2:User): Boolean`
+      **effects** returns true if {user1, user2} exists in friends otherwise false

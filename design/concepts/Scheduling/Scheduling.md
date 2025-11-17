@@ -3,7 +3,7 @@
 
 *   **concept**: Scheduling \[User, Event]
 *   **purpose**: Track events in a person's schedule and compare with others
-*   **principle**: If a user adds different events to their schedule, they can then compare schedules and see which events they have in common. 
+*   **principle**: If a user adds different events to their schedule, they can then compare schedules and see which events they have in common.
 *   **state**:
 
     ```
