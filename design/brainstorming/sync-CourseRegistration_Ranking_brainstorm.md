@@ -1,7 +1,7 @@
 
 [@implementing-synchronizations](../background/implementing-synchronizations.md)
 [@spec](../concepts/CourseRegistering/spec.md)
-[@spec](../concepts/Ranking/spec.md)
+[@spec](../concepts/Preferencing/spec.md)
 
 # prompt: create basic ("pseudo code") syncs for Ranking and CourseRegistering that are user-facing, i.e. when some request happens where Sessioning._getUser(session) associated with current user then call the concept's actions. Then, provide example syncs that connnect CourseRegistering with Ranking. For example if CourseRegistering had a removeCourse action then when that happens all associated Rankings should be removed too
 
