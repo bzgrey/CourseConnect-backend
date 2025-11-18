@@ -1,11 +1,8 @@
-[@concept-background](../../tools/concept-background.md)
-
-[@CourseScheduling](CourseScheduling.md)
-
-# implement: CourseScheduling
-implement the CourseScheduling concept above
-The event
-# response:
+---
+timestamp: 'Tue Nov 18 2025 12:41:35 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251118_124135.4df0e2a2.md]]'
+content_id: b8d8cb365b3c26276ce24a8d28a26a14d14fe042335d8d107edc2b1b59cb5947
+---
 
 # file: src/concepts/CourseScheduling/CourseSchedulingConcept.ts
 

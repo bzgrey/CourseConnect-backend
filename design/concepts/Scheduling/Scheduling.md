@@ -1,46 +1,49 @@
 
 # concept: Scheduling
 
-*   **concept**: Scheduling \[User, Event]
-*   **purpose**: Track events in a person's schedule and compare with others
-*   **principle**: If a user adds different events to their schedule, they can then compare schedules and see which events they have in common.
-*   **state**:
+**concept**: Scheduling \[User, Event]
+**purpose**: Track events in one's schedule and compare with others
+**principle**: If a user adds different events to their schedule, they can then compare schedules and see which events they have in common. 
 
-    ```
-    a set of Users with
-      a schedule Schedule
+**types**:
+  * `MeetingTime`:
+    * a set of `days` (e.g., {Tuesday, Thursday})
+    * a `startTime` of type `Time`
+    * an `endTime` of type `Time`
 
-    a set of Schedules with
-      an events set of Events
+**state**:
+* a set of Users with
+	* a Schedule
+* a set of Schedules with
+	* a user User
+	* a set of Events
+* a set of Events with
+	* a name String (could be the Course name)
+	* a type String (Lecture/Recitation/Lab/other)
+	* a MeetingTime
+	* an optional user User
 
-    ```
-
-*   **actions**
-
-    **`createSchedule (user: User): (schedule: Schedule)`**
+**actions:**
+* **`createSchedule (user: User): (schedule: Schedule)`**
     *   **requires**: The given `user` does not already have a schedule.
     *   **effects**: Creates a new, empty `Schedule` `s`; associates `s` with the `user`; returns the new `Schedule`'s identifier as `schedule`.
-
-    **`addEvent (user: User, event: Event)`**
-    *   **requires**: The `user` has a schedule; the `event` isn't already in the schedule
+* **`addEvent (event: Event, name: String, type: String, time: MeetingTime, user?: User)`**
+    *   **requires**: the `event` isn't already in the set of Events
+    *   **effects**: Adds the `event` to the set of Events with the given info
+* **`removeEvent (event: Event, user?: User)`**
+    *   **requires**: The `event` is in set of events; If a user is given, then the event must have this user
+    *   **effects**: Removes the `event` from the `user`'s schedule.
+* scheduleEvent (user: User, event: Event)
+    *   **requires**: The `user` has a schedule; the `event` is in the set of Events
     *   **effects**: Adds the `event` to the `user`'s schedule.
-
-
-    **`removeEvent (user: User, event: Event)`**
+* **`unscheduleEvent (user: User, event: Event)`**
     *   **requires**: The `user` has a schedule, and the `event` is in the `user`'s schedule.
     *   **effects**: Removes the `event` from the `user`'s schedule.
 
-    **`deleteEvent (event: Event)`**
-    *   **requires**: The `event` exists.
-    *   **effects**: removes the `event` from any Schedule that contains it.
-
-
-*   **queries**: Reads of the concept state.
-
-    **`_getUserSchedule (user: User): events: Event[]`**
+**queries**:
+* **`_getUserSchedule(user: User):(event: Event, name: String, type: String, times: MeetingTime)[]`**
     *   **requires**: The `user` has a schedule.
-    *   **effects**: Returns a set of all events (id's) in the user's schedule
-
-    **`_getScheduleComparison (user1: User, user2: User): events: Event[]`**
+    *   **effects**: Returns a set of all events (id's) in the user's schedule with their names, types, and times
+* **`_getScheduleComparison (user1: User, user2: User): events: Event[]`**
     *   **requires**: Both `user1` and `user2` have schedules.
-    *   **effects**: Returns the common event id's between the schedules of user1 and user2
+    *   **effects**: Returns the common event id's between the schedules of user1 and user
