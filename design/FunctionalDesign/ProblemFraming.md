@@ -1,11 +1,5 @@
 # Problem Framing
 
-The problem framing is like the one you did for the personal project, augmented with the ethics analysis, which subsumes the stakeholder analysis.
-In your personal project, you listed only 3 features. For your team project, we encourage you to brainstorm a longer list from which you can draw the most promising in your functional design.
-Since the ethical analysis is new, a full explanation of the steps involved is provided in a separate document.
-
----
-
 ## Domain
 
 **School / Scheduling** — As students going to the same school, all of us need to optimize and schedule our different activities.
@@ -14,7 +8,7 @@ Since the ethical analysis is new, a full explanation of the steps involved is p
 
 ## Problem
 
-We are constantly facing challenges of optimizing and coordinating schedules with others. We want to take the same schedules as friends, but asking every single friend and then physically comparing can be hard to coordinate.
+We are constantly facing challenges of optimizing and coordinating schedules with others. We want to take the same schedules as friends, but asking every single friend and then physically comparing and "aligning" schedules can be hard to coordinate.
 
 ---
 

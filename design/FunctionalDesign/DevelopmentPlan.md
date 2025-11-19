@@ -1,11 +1,12 @@
 # Development Plan
 
 ## Feature Delivery Table
+**Note:** Component means frontend component.
 
 | Feature / Task             | Checkpoint | Owner                                    |
 | -------------------------- | ---------- | ---------------------------------------- |
-| Course Scheduling Concept  | Alpha      | Benny                                    |
-| Catalog Creation / Hydrant | Alpha      | Betsegaw                                 |
+| Scheduling Concept         | Alpha      | Benny                                    |
+| CourseCataloging / Hydrant | Alpha      | Betsegaw                                 |
 | Friending Concept          | Alpha      | Yabetse (also initializes frontend repo) |
 | Schedule Component         | Alpha      | Betsegaw (w/ dummy data), Benny          |
 | Course Info Component      | Alpha      | Giani                                    |
