@@ -8,8 +8,8 @@
 
 - [Problem Framing](design/FunctionalDesign/ProblemFraming.md) 
 - [Concept Design](design/FunctionalDesign/ConceptDesign.md) (ADD SYNCS)
-- [User Journey](design/FunctionalDesign/UserJourney.md) (TODO)
-- [UI Sketches](design/FunctionalDesign/UISketches.md) (TODO)
+- [User Journey](design/FunctionalDesign/UserJourney.md) 
+- [UI Sketches](design/FunctionalDesign/UISketches.md) 
 - [VisualDesignStudy](design/FunctionalDesign/VisualDesignStudy.md) 
 - [DesignSummary](design/FunctionalDesign/DesignSummary.md) 
 - [DevelopmentPlan](design/FunctionalDesign/DevelopmentPlan.md) 
