@@ -80,7 +80,7 @@ One non-targeted use of the app that could adversely affect stakeholders is that
 Instructors and advisors could use visibility data to identify collaboration opportunities, but could also misinterpret social clustering as performance predictors, affecting advising and grading biases.
 
 **Design Response:**
-Limit administrative access by requiring explicit consent for instructors/advisors to view aggregate student networks. Provide only **de-identified, aggregated analytics** for course planning.
+Limit administrative access by requiring explicit consent for instructors/advisors to view aggregate student networks. Provide only **de-identified, aggregated analytics** for course planning. **However, we will probably not implement this feature.**
 
 ---
 
@@ -90,7 +90,7 @@ Limit administrative access by requiring explicit consent for instructors/adviso
 Short-term convenience (coordinating study groups) can lead to long-term **social sorting**: students may cluster classes with friends, narrowing exposure to diverse peers and reducing serendipitous academic exploration — both valuable for employers and society as diversity fosters innovation.
 
 **Design Response:**
-Add **“diversity nudges”** highlighting courses outside a user’s friend cluster and offer **anonymized friend-overlap statistics** to encourage broader enrollment choices. *(Betsegaw)*
+Add **“diversity nudges”** highlighting courses outside a user’s friend cluster and offer **anonymized friend-overlap statistics** to encourage broader enrollment choices. **However, we will probably not implement this feature.**
 
 ---
 
@@ -110,6 +110,6 @@ Add **blacklisting capability** within schedule visibility settings — allowing
 As adoption expands, students would benefit from easier coordination, increased belonging, and more efficient course discovery. However, widespread use may also create social pressure to align schedules with friends, exclude non-users, and risk institutional misuse of schedule data.
 
 **Design Response:**
-Implement “open-to-collaborate” tags for courses to balance broad inclusivity while being able to hide other parts of a scheudle.
+Implement “open-to-collaborate” tags for courses to balance broad inclusivity while being able to hide other parts of a schedule. **We will probably not implement this feature for this project.**
 
 ---

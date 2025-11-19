@@ -1,4 +1,4 @@
-[@ProblemFraming](../../ProblemFraming.md)
+[@ProblemFraming](../FunctionalDesign/ProblemFraming.md)
 
 # prompt: Create a script for 4 people named Betsegaw, Benny, Giani, and Yabet for a 3 minute video. They will present their functional design not only as a document but also as a short video to be shared with the class, outlining the problem they're addressing and the key concepts of their design. These videos will be shown in junior-senior level college class,
 # response:
