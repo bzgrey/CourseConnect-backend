@@ -47,3 +47,13 @@
 * **`_getScheduleComparison (user1: User, user2: User): events: Event[]`**
     *   **requires**: Both `user1` and `user2` have schedules.
     *   **effects**: Returns the common event id's between the schedules of user1 and user
+
+<!-- 
+when 
+    Requesting.request (path: /get-schedule, user)
+where
+    Scheduling._getUserSchedule(user) : (event)
+    CourseCataloging._getCourse(event) : (name: String, type: String, times: MeetingTime)
+    return frames.collectAs([name, type, times], results);
+then
+    Requesting.respond () -->

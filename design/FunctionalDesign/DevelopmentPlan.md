@@ -6,8 +6,10 @@
 | Feature / Task             | Checkpoint | Owner                                    |
 | -------------------------- | ---------- | ---------------------------------------- |
 | Scheduling Concept         | Alpha      | Benny                                    |
-| CourseCataloging / Hydrant | Alpha      | Betsegaw                                 |
-| Friending Concept          | Alpha      | Yabetse (also initializes frontend repo) |
+| CourseCataloging           | Alpha      | Benny                                    |
+| Hydrant Parsing            | Alpha      | Betsegaw                                 |
+| Friending Concept          | Alpha      | Yabetse                                  |
+| User Login Page            | Alpha      | Benny                                    |
 | Schedule Component         | Alpha      | Betsegaw (w/ dummy data), Benny          |
 | Course Info Component      | Alpha      | Giani                                    |
 | User Profile Page          | Alpha      | Yabetse                                  |
