@@ -32,7 +32,7 @@ Deno.test("CourseCatalogConcept", async (t) => {
         const result = await catalog.defineCourse({ name: courseName, events });
         console.log("    Result:", result);
 
-        assertNotEquals(
+        assertEquals(
           (result as { error: string }).error,
           undefined,
           "Action should not return an error",

@@ -19,7 +19,7 @@ Deno.test("SchedulingConcept: Actions and Principle", async (t) => {
     await t.step("should create a new schedule for a user", async () => {
       console.log("  - Testing successful schedule creation for userA");
       const result = await scheduling.createSchedule({ user: userA });
-      assertNotEquals(
+      assertEquals(
         (result as { error: string }).error,
         undefined,
         "Expected a schedule ID, not an error.",
