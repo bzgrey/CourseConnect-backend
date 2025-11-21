@@ -1,8 +1,8 @@
 import { Event, Timeslot } from "./activity.ts";
 import type { RawClass, RawSection } from "./rawClass.ts";
 
-// This isn't exported intentionally. Instead of using this, can you use
-// Sections directly?
+// USE THE EXPORTED CLASS OBJECTS AT THE BOTTOM OF THE FILE TO QUERY DIFFERENT INFORMATION ABOUT COURSES. 
+
 enum SectionKind {
   LECTURE,
   RECITATION,
