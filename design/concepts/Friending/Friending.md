@@ -1,6 +1,7 @@
 *   **concept**: Friending [User]
-*   **purpose**: To manage mutual, consent-based social connections between users.
-*   **principle**: If User A sends a friend request to User B, and User B accepts the request, then User A and User B will appear on each other's friends list.
+*   **purpose**: To manage mutual, consent-based social connections between users, and allow mutual friends to see each other's schedules.
+*   **principle**: If User A sends a friend request to User B, and User B accepts the request, then User A and User B will appear on each other's friends list. And they
+                   will be able to see each others schedules.
 *   **state**:
     `pendingRequests: a set of (requester: User, requestee: User)`
     `friends: a set of {user1: User, user2: User}` (a symmetric relationship)
