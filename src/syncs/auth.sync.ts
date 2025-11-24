@@ -1,5 +1,10 @@
 import { actions, Sync } from "@engine";
-import { Requesting, Sessioning, UserAuthentication } from "@concepts";
+import {
+  Requesting,
+  Scheduling,
+  Sessioning,
+  UserAuthentication,
+} from "@concepts";
 
 //-- User Registration --//
 export const RegisterRequest: Sync = ({ request, username, password }) => ({
@@ -16,7 +21,10 @@ export const RegisterResponseSuccess: Sync = ({ request, user }) => ({
     [Requesting.request, { path: "/UserAuthentication/register" }, { request }],
     [UserAuthentication.register, {}, { user }],
   ),
-  then: actions([Requesting.respond, { request, user }]),
+  then: actions([Requesting.respond, { request, user }], [
+    Scheduling.createSchedule,
+    { user },
+  ]),
 });
 
 export const RegisterResponseError: Sync = ({ request, error }) => ({
