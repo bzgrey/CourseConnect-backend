@@ -26,11 +26,9 @@
 
 export const inclusions: Record<string, string> = {
   // Feel free to delete these example inclusions
-  "/api/LikertSurvey/_getSurveyQuestions": "this is a public query",
-  "/api/LikertSurvey/_getSurveyResponses": "responses are public",
-  "/api/LikertSurvey/_getRespondentAnswers": "answers are visible",
-  "/api/LikertSurvey/submitResponse": "allow anyone to submit response",
-  "/api/LikertSurvey/updateResponse": "allow anyone to update their response",
+  "/api/CourseCatalog/_getAllCourses": "this is public information",
+  "/api/CourseCatalog/_getCourseInfo": "this is public information",
+  "/api/CourseCatalog/_getAllCourses": "this is public information",
 };
 
 /**
@@ -45,6 +43,18 @@ export const inclusions: Record<string, string> = {
 
 export const exclusions: Array<string> = [
   // Feel free to delete these example exclusions
-  "/api/LikertSurvey/createSurvey",
-  "/api/LikertSurvey/addQuestion",
+  "/api/UserAuthentication/register",
+  "/api/UserAuthentication/login",
+  "/api/UserAuthentication/logout",
+  "/api/UserAuthentication/_getUserByUsername",
+  "/api/UserAuthentication/_getUsername",
+  "/api/Sessioning/_getUser",
+  "/api/Sessioning/create",
+  "/api/Sessioning/delete",
+  "/api/Scheduling/createSchedule",
+  "/api/Scheduling/scheduleEvent",
+  "/api/Scheduling/unscheduleEvent",
+  "/api/Scheduling/_getUserSchedule",
+  "/api/Scheduling/_getScheduleComparison",
+  "/api/CourseCatalog/timeToMinutes",
 ];
