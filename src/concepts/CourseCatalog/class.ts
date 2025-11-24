@@ -519,44 +519,52 @@ export class Class {
 
     for (const sections of this.sections) {
       for (const section of sections.sections) {
-        // Parse the rawTime format: "room/days/evening/time"
-        // Example: "6-120/MW/0/12.30-2" or "4-149/TR/0/10"
-        const [_, daysStr, __, timeStr] = section.rawTime.split("/");
-
-        // Convert day abbreviations to full names
-        const dayMap: Record<string, string> = {
-          M: "Monday",
-          T: "Tuesday",
-          W: "Wednesday",
-          R: "Thursday",
-          F: "Friday",
-        };
-
-        const days = daysStr.split("").map((d) => dayMap[d]);
-
-        // Parse time string (e.g., "12.30-2" or "10")
-        let startTime: string;
-        let endTime: string;
-
-        if (timeStr.includes("-")) {
-          const [start, end] = timeStr.split("-");
-          startTime = this.parseTimeString(start);
-          endTime = this.parseTimeString(end);
+        if (section.rawTime === "TBD") {
+          continue;
         } else {
-          // Single hour slot (e.g., "10" means 10:00-11:00)
-          const hour = parseInt(timeStr);
-          startTime = `${hour.toString().padStart(2, "0")}:00`;
-          endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
-        }
+          // Parse the rawTime format: "room/days/evening/time"
+          // Example: "6-120/MW/0/12.30-2" or "4-149/TR/0/10"
+          const [_, daysStr, __, timeStr] = section.rawTime.split("/");
 
-        events.push({
-          type: sections.name, // "Lecture", "Recitation", "Lab", or "Design"
-          times: {
-            days,
-            startTime,
-            endTime,
-          },
-        });
+          // Convert day abbreviations to full names
+          const dayMap: Record<string, string> = {
+            M: "Monday",
+            T: "Tuesday",
+            W: "Wednesday",
+            R: "Thursday",
+            F: "Friday",
+          };
+          if (daysStr === undefined) {
+            console.log("Undefined daysStr for section:", section.rawTime);
+            console.log("name: ", name);
+          }
+          // console.log(daysStr);
+          const days = daysStr.split("").map((d) => dayMap[d]);
+
+          // Parse time string (e.g., "12.30-2" or "10")
+          let startTime: string;
+          let endTime: string;
+
+          if (timeStr.includes("-")) {
+            const [start, end] = timeStr.split("-");
+            startTime = this.parseTimeString(start);
+            endTime = this.parseTimeString(end);
+          } else {
+            // Single hour slot (e.g., "10" means 10:00-11:00)
+            const hour = parseInt(timeStr);
+            startTime = `${hour.toString().padStart(2, "0")}:00`;
+            endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
+          }
+
+          events.push({
+            type: sections.name, // "Lecture", "Recitation", "Lab", or "Design"
+            times: {
+              days,
+              startTime,
+              endTime,
+            },
+          });
+        }
       }
     }
 
@@ -711,6 +719,7 @@ export interface SemesterData {
 
 // Fetch latest.json
 import { readFile } from "node:fs/promises";
+import { CourseCatalog } from "@concepts";
 
 const { classes } = JSON.parse(
   await readFile(
@@ -727,16 +736,19 @@ const classesMap: Map<string, RawClass> = new Map(Object.entries(classes));
 export const classObjects = Array.from(classesMap.values()).map((rawClass) =>
   new Class(rawClass)
 );
-console.log(classObjects);
+// console.log(classObjects);
 
 // Test the new methods
-// for (const classobj of classObjects) {
-//   if (classobj.number === "8.05") {
-//     console.log("Course:", classobj.number);
-//     console.log("\ntoDefineCourseFormat():");
-//     console.log(JSON.stringify(classobj.toDefineCourseFormat(), null, 2));
 
-//     console.log("\ngetAllSectionTimes():");
-//     console.log(JSON.stringify(classobj.getAllSectionTimes(), null, 2));
-//   }
-// }
+for (const classobj of classObjects) {
+  // if (classobj.number === "8.05") {
+  //   console.log("Course:", classobj.number);
+  //   console.log("\ntoDefineCourseFormat():");
+  //   console.log(JSON.stringify(classobj.toDefineCourseFormat(), null, 2));
+
+  //   console.log("\ngetAllSectionTimes():");
+  //   console.log(JSON.stringify(classobj.getAllSectionTimes(), null, 2));
+  // }
+  // console.log(JSON.stringify(classobj, null, 2));
+  await CourseCatalog.defineCourse(classobj.toDefineCourseFormat());
+}

@@ -69,7 +69,7 @@ export const ScheduleEventResponse: Sync = (
 ) => ({
   when: actions(
     [Requesting.request, { path: "/Scheduling/scheduleEvent" }, { request }],
-    [Scheduling.scheduleEvent, { user, event }],
+    [Scheduling.scheduleEvent, { user, event }, {}],
   ),
   then: actions([Requesting.respond, { request }]),
 });
@@ -111,7 +111,7 @@ export const UnscheduleEventResponse: Sync = (
 ) => ({
   when: actions(
     [Requesting.request, { path: "/Scheduling/unscheduleEvent" }, { request }],
-    [Scheduling.unscheduleEvent, { user, event }],
+    [Scheduling.unscheduleEvent, { user, event }, {}],
   ),
   then: actions([Requesting.respond, { request }]),
 });
