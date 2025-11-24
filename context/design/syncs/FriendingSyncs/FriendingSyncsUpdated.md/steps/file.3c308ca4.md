@@ -1,48 +1,8 @@
-
-[@implementing-concepts](../../background/implementing-concepts.md)
-
-[@concept-design-brief](../../background/concept-design-brief.md)
-
-[@concept-specifications](../../background/concept-specifications.md)
-
-[@Friending](Friending.md)
-
-# implement: Friending
-# response:
-
-# concept: Friending
-
-*   **concept**: Friending \[User]
-*   **purpose**: To manage mutual, consent-based social connections between users.
-*   **principle**: If User A sends a friend request to User B, and User B accepts the request, then User A and User B will appear on each other's friends list.
-*   **state**:
-    `pendingRequests: a set of (requester: User, requestee: User)`
-    `friends: a set of {user1: User, user2: User}` (a symmetric relationship)
-*   **actions**:
-    `requestFriend (requester: User, requestee: User)`
-    **requires** `requester` and `requestee` are not already friends. A pending request from `requester` to `requestee` does not already exist. `requester` is not `requestee`.
-    **effects** Adds the pair (`requester`, `requestee`) to the `pendingRequests` set.
-
-    `acceptFriend (requester: User, requestee: User)`
-    **requires** A pending request from `requester` to `requestee` exists in pendingRequests.
-    **effects** Removes the pair (`requester`, `requestee`) from `pendingRequests`. Adds the pair `{requester, requestee}` to the `friends` set.
-
-    `rejectFriend (requester: User, requestee: User)`
-    **requires** A pending request from `requester` to `requestee` exists in pendingRequests.
-    **effects** Removes the pair (`requester`, `requestee`) from `pendingRequests`.
-
-    `removeFriend (remover: User, removed: User)`
-    **requires** `remover` and `removed` are friends.
-    **effects** Removes the pair `{remover, removed}` from the `friends` set.
-*   **queries**
-    `_getAllFriendRequests (user:User):User[]`
-    **effects** returns list of requestees for user
-
-    `_getAllFriends (user:User):User[]`
-    **effects** returns list of friends for user
-
-    `_areTheyFriends(user1:User, user2:User): Boolean`
-    **effects** returns true if {user1, user2} exists in friends otherwise false
+---
+timestamp: 'Sun Nov 23 2025 20:16:44 GMT-0500 (Eastern Standard Time)'
+parent: '[[..\20251123_201644.402e3bf8.md]]'
+content_id: 3c308ca4007a71d534918a296dac27d33dec46722062ebf92585f733edf37ef9
+---
 
 # file: src/concepts/friending/FriendingConcept.ts
 
@@ -407,3 +367,29 @@ export default class FriendingConcept {
 
 }
 ```
+
+## Blocking:
+
+Specification:
+
+* **concept**: Blocking \[User]
+* **purpose**: To empower users to prevent specific individuals from viewing their information, even if they are in a shared group or context.
+* **principle**: If User A blocks User B, then even if they are both members of the same group, any application feature that tries to show User A's schedule to User B will fail or show nothing.
+* **state**:
+  * A set of blockLists with:
+    * a `user`:User
+    * a `blockedUsers` list of Users
+* **actions**:
+  * `blockUser (blocker: User, userToBlock: User)`
+    * **requires** blocker is not userToBlock
+    * **effects** If blocker exists as a user in `blockLists`, add `userToBlock` to `blockedUsers` for the entry of blockLists with user==blocker if userToBlock isn't already in the `blockedUsers` list. Otherwise create a new blockLists entry with user=blocker, and the list \[userToBlock]
+  * `unblockUser (blocker: User, userToUnblock: User)`
+    * **requires** `userToUnblock` is in the `blockedUsers` list for the entry in blockLists where `user` is `blocker`
+    * **effects** Removes the pair `userToUnblock` from the `blockedUsers` list.
+* **queries**:
+  * `_isUserBlocked(primaryUser: User, secondaryUser: User): [Boolean]`
+    * **effects** Returns true if `primaryUser` is a user in a blockLists entry and `secondaryUser` is in that entry’s `blockedUsers` list.
+  * `blockedUsers(user:User):Users[]`
+    * **effects** returns blockedUsers for blockLists entry with `user`, and if one doesn't exist return an empty list
+
+Code:

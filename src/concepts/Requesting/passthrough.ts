@@ -57,4 +57,8 @@ export const exclusions: Array<string> = [
   "/api/Scheduling/_getUserSchedule",
   "/api/Scheduling/_getScheduleComparison",
   "/api/CourseCatalog/timeToMinutes",
+  // Friending routes handled by syncs
+  "/api/Friending/requestFriend",
+  "/api/Friending/acceptFriend",
+  "/api/Friending/rejectFriend",
 ];
