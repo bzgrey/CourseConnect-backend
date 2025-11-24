@@ -1,7 +1,7 @@
 import { Event, Timeslot } from "./activity.ts";
 import type { RawClass, RawSection } from "./rawClass.ts";
 
-// USE THE EXPORTED CLASS OBJECTS AT THE BOTTOM OF THE FILE TO QUERY DIFFERENT INFORMATION ABOUT COURSES. 
+// USE THE EXPORTED CLASS OBJECTS AT THE BOTTOM OF THE FILE TO QUERY DIFFERENT INFORMATION ABOUT COURSES.
 
 enum SectionKind {
   LECTURE,
@@ -501,6 +501,142 @@ export class Class {
     };
   }
 
+  /**
+   * Convert this Class to the format expected by CourseCatalogConcept.defineCourse
+   * @returns Object with name and events array formatted for defineCourse
+   */
+  toDefineCourseFormat(): {
+    name: string;
+    events: {
+      type: string;
+      times: { days: string[]; startTime: string; endTime: string };
+    }[];
+  } {
+    const events: {
+      type: string;
+      times: { days: string[]; startTime: string; endTime: string };
+    }[] = [];
+
+    for (const sections of this.sections) {
+      for (const section of sections.sections) {
+        // Parse the rawTime format: "room/days/evening/time"
+        // Example: "6-120/MW/0/12.30-2" or "4-149/TR/0/10"
+        const [_, daysStr, __, timeStr] = section.rawTime.split("/");
+
+        // Convert day abbreviations to full names
+        const dayMap: Record<string, string> = {
+          M: "Monday",
+          T: "Tuesday",
+          W: "Wednesday",
+          R: "Thursday",
+          F: "Friday",
+        };
+
+        const days = daysStr.split("").map((d) => dayMap[d]);
+
+        // Parse time string (e.g., "12.30-2" or "10")
+        let startTime: string;
+        let endTime: string;
+
+        if (timeStr.includes("-")) {
+          const [start, end] = timeStr.split("-");
+          startTime = this.parseTimeString(start);
+          endTime = this.parseTimeString(end);
+        } else {
+          // Single hour slot (e.g., "10" means 10:00-11:00)
+          const hour = parseInt(timeStr);
+          startTime = `${hour.toString().padStart(2, "0")}:00`;
+          endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
+        }
+
+        events.push({
+          type: sections.name, // "Lecture", "Recitation", "Lab", or "Design"
+          times: {
+            days,
+            startTime,
+            endTime,
+          },
+        });
+      }
+    }
+
+    return {
+      name: this.number, // Use course number as name (e.g., "8.05")
+      events,
+    };
+  }
+
+  /**
+   * Helper to parse time strings like "12.30" or "2" to "HH:mm" format
+   */
+  private parseTimeString(timeStr: string): string {
+    if (timeStr.includes(".")) {
+      const [hours, minutes] = timeStr.split(".");
+      return `${hours.padStart(2, "0")}:${minutes}`;
+    } else {
+      const hour = parseInt(timeStr);
+      return `${hour.toString().padStart(2, "0")}:00`;
+    }
+  }
+
+  /**
+   * Get a flattened list of all section meeting times for this class
+   * @returns Array of objects with section type and meeting time details
+   */
+  getAllSectionTimes(): {
+    type: string;
+    days: string[];
+    startTime: string;
+    endTime: string;
+    room: string;
+  }[] {
+    const result: {
+      type: string;
+      days: string[];
+      startTime: string;
+      endTime: string;
+      room: string;
+    }[] = [];
+
+    const dayMap: Record<string, string> = {
+      M: "Monday",
+      T: "Tuesday",
+      W: "Wednesday",
+      R: "Thursday",
+      F: "Friday",
+    };
+
+    for (const sections of this.sections) {
+      for (const section of sections.sections) {
+        const [_, daysStr, __, timeStr] = section.rawTime.split("/");
+        const days = daysStr.split("").map((d) => dayMap[d]);
+
+        let startTime: string;
+        let endTime: string;
+
+        if (timeStr.includes("-")) {
+          const [start, end] = timeStr.split("-");
+          startTime = this.parseTimeString(start);
+          endTime = this.parseTimeString(end);
+        } else {
+          const hour = parseInt(timeStr);
+          startTime = `${hour.toString().padStart(2, "0")}:00`;
+          endTime = `${(hour + 1).toString().padStart(2, "0")}:00`;
+        }
+
+        result.push({
+          type: sections.name,
+          days,
+          startTime,
+          endTime,
+          room: section.room,
+        });
+      }
+    }
+
+    return result;
+  }
+
   /** Deflate a class to something JSONable. */
   deflate() {
     const sections = this.sections.map((secs) =>
@@ -574,7 +710,7 @@ export interface SemesterData {
 // };
 
 // Fetch latest.json
-import { readFile } from "fs/promises";
+import { readFile } from "node:fs/promises";
 
 const { classes } = JSON.parse(
   await readFile(
@@ -593,10 +729,14 @@ export const classObjects = Array.from(classesMap.values()).map((rawClass) =>
 );
 console.log(classObjects);
 
-// for (const classobj of classObjects){
-//     if (classobj.number === "8.05"){
-//         for (const section of classobj.sections){
-//           console.log(section.cls);
-//         }
-//     }
+// Test the new methods
+// for (const classobj of classObjects) {
+//   if (classobj.number === "8.05") {
+//     console.log("Course:", classobj.number);
+//     console.log("\ntoDefineCourseFormat():");
+//     console.log(JSON.stringify(classobj.toDefineCourseFormat(), null, 2));
+
+//     console.log("\ngetAllSectionTimes():");
+//     console.log(JSON.stringify(classobj.getAllSectionTimes(), null, 2));
+//   }
 // }
