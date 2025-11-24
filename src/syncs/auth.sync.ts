@@ -1,4 +1,4 @@
-import { actions, Sync } from "@engine";
+import { actions, Sync, Frames } from "@engine";
 import {
   Requesting,
   Scheduling,
@@ -80,4 +80,62 @@ export const LogoutResponse: Sync = ({ request }) => ({
     [Sessioning.delete, {}, {}],
   ),
   then: actions([Requesting.respond, { request, status: "logged_out" }]),
+});
+
+//-- Get User from Session (Query) --//
+export const GetUserFromSessionResponseSuccess: Sync = ({ request, session, user }) => ({
+  when: actions([Requesting.request, { path: "/Sessioning/_getUser", session }, { request }]),
+  where: async (frames: Frames) => {
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    // Only proceed if query returned results (user found)
+    if (frames.length === 0) {
+      return new Frames(); // Return empty so this sync doesn't fire
+    }
+    return frames;
+  },
+  then: actions([Requesting.respond, { request, user }]),
+});
+
+export const GetUserFromSessionResponseError: Sync = ({ request, session, user }) => ({
+  when: actions([Requesting.request, { path: "/Sessioning/_getUser", session }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    // If query returns empty, session is invalid
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request] });
+    }
+    // If user exists, this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: "Invalid session" }]),
+});
+
+//-- Get Username (Query) --//
+export const GetUsernameResponseSuccess: Sync = ({ request, user, username }) => ({
+  when: actions([Requesting.request, { path: "/UserAuthentication/_getUsername", user }, { request }]),
+  where: async (frames: Frames) => {
+    frames = await frames.query(UserAuthentication._getUsername, { user }, { username });
+    // Only proceed if query returned results (user found)
+    if (frames.length === 0) {
+      return new Frames(); // Return empty so this sync doesn't fire
+    }
+    return frames;
+  },
+  then: actions([Requesting.respond, { request, username }]),
+});
+
+export const GetUsernameResponseError: Sync = ({ request, user, username }) => ({
+  when: actions([Requesting.request, { path: "/UserAuthentication/_getUsername", user }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+    frames = await frames.query(UserAuthentication._getUsername, { user }, { username });
+    // If query returns empty, user not found
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request] });
+    }
+    // If username exists, this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: "User not found" }]),
 });
