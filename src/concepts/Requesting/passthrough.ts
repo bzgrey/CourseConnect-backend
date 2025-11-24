@@ -28,7 +28,7 @@ export const inclusions: Record<string, string> = {
   // Feel free to delete these example inclusions
   "/api/CourseCatalog/_getAllCourses": "this is public information",
   "/api/CourseCatalog/_getCourseInfo": "this is public information",
-  "/api/CourseCatalog/_getAllCourses": "this is public information",
+  "/api/CourseCatalog/_getEventInfo": "this is public information",
 };
 
 /**
@@ -57,6 +57,7 @@ export const exclusions: Array<string> = [
   "/api/Scheduling/_getUserSchedule",
   "/api/Scheduling/_getScheduleComparison",
   "/api/CourseCatalog/timeToMinutes",
+  "/api/CourseCatalog/defineCourse",
   // Friending routes handled by syncs
   "/api/Friending/requestFriend",
   "/api/Friending/acceptFriend",
