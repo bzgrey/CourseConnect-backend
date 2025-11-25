@@ -64,4 +64,6 @@ export const exclusions: Array<string> = [
   "/api/Friending/rejectFriend",
   "/api/Friending/_getAllIncomingFriendRequests",
   "/api/Friending/_getAllOutgoingFriendRequests",
+  "/api/Friending/_getAllFriends",
+  "/api/Friending/_areTheyFriends",
 ];

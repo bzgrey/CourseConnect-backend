@@ -304,3 +304,108 @@ export const GetAllOutgoingFriendRequestsResponseError: Sync = ({ request, sessi
   },
   then: actions([Requesting.respond, { request, error: "Invalid session" }]),
 });
+
+// ============================================================================
+// Get All Friends (Query)
+// ============================================================================
+
+export const GetAllFriendsResponseSuccess: Sync = ({ request, session, user, friend, friends }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllFriends", session }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Authenticate: Get user from session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames(); // Invalid session, return empty so this sync doesn't fire
+    }
+
+    // Query for all friends
+    // _getAllFriends returns { friend: User }[], so we can use frames.query() to bind
+    frames = await frames.query(Friending._getAllFriends, { user }, { friend });
+
+    // Handle empty results (no friends)
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [friends]: [] });
+    }
+
+    // Collect all friend IDs into a single array
+    return frames.collectAs([friend], friends);
+  },
+  then: actions([Requesting.respond, { request, friends }]),
+});
+
+export const GetAllFriendsResponseError: Sync = ({ request, session, user }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllFriends", session }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Check if session is valid
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request] });
+    }
+
+    // If we get here, session is valid, so this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: "Invalid session" }]),
+});
+
+// ============================================================================
+// Are They Friends (Query)
+// ============================================================================
+
+export const AreTheyFriendsResponseSuccess: Sync = ({ request, session, user1, targetUsername, user2, areFriends }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_areTheyFriends", session, targetUsername }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Authenticate: Get current user from session
+    frames = await frames.query(Sessioning._getUser, { session }, { user: user1 });
+    if (frames.length === 0) {
+      return new Frames(); // Invalid session, return empty so this sync doesn't fire
+    }
+
+    // Look up target user by username
+    frames = await frames.query(UserAuthentication._getUserByUsername, { username: targetUsername }, { user: user2 });
+    if (frames.length === 0) {
+      return new Frames(); // User not found, return empty so this sync doesn't fire
+    }
+
+    // Query if they are friends
+    // _areTheyFriends returns { areFriends: boolean }[], so we can use frames.query() to bind
+    frames = await frames.query(Friending._areTheyFriends, { user1, user2 }, { areFriends });
+
+    // Should always return at least one result (the query always returns one item)
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [areFriends]: false });
+    }
+
+    return frames;
+  },
+  then: actions([Requesting.respond, { request, areFriends }]),
+});
+
+export const AreTheyFriendsResponseError: Sync = ({ request, session, targetUsername, user1, user2, queryError }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_areTheyFriends", session, targetUsername }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Check if session is valid
+    frames = await frames.query(Sessioning._getUser, { session }, { user: user1 });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [queryError]: "Invalid session" });
+    }
+
+    // Check if target username exists
+    frames = await frames.query(UserAuthentication._getUserByUsername, { username: targetUsername }, { user: user2 });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [queryError]: "User not found" });
+    }
+
+    // If we get here, both users exist, so this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: queryError }]),
+});

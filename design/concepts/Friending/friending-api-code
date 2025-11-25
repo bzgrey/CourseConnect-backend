@@ -83,15 +83,15 @@ export async function apiCall(
 /**
  * Sends a friend request from one user to another.
  * API Spec: POST /api/Friending/request
- * Implementation: requestFriend method expects { requester, requestee }
- * @param from - The user sending the friend request
- * @param to - The user receiving the friend request
+ * Sync expects: { session, targetUsername }
+ * @param session - The session token for authentication
+ * @param targetUsername - The username of the user to send the friend request to
  * @returns Empty object on success, throws error on failure
  */
-export async function requestFriend(from: string, to: string): Promise<Record<string, never>> {
+export async function requestFriend(session: string, targetUsername: string): Promise<Record<string, never>> {
   return await apiCall(
-    '/api/Friending/requestFriend',
-    { requester: from, requestee: to },
+    '/api/friending/request',
+    { session, targetUsername },
     'requestFriend'
   ) as Record<string, never>;
 }
@@ -99,15 +99,15 @@ export async function requestFriend(from: string, to: string): Promise<Record<st
 /**
  * Accepts an existing friend request, creating a friendship.
  * API Spec: POST /api/Friending/accept
- * Implementation: acceptFriend method expects { requester, requestee }
- * @param requester - The user who sent the friend request
- * @param requestee - The user who received the friend request (and is now accepting)
+ * Sync expects: { session, requesterUsername }
+ * @param session - The session token for authentication
+ * @param requesterUsername - The username of the user who sent the friend request
  * @returns Empty object on success, throws error on failure
  */
-export async function acceptFriend(requester: string, requestee: string): Promise<Record<string, never>> {
+export async function acceptFriend(session: string, requesterUsername: string): Promise<Record<string, never>> {
   return await apiCall(
-    '/api/Friending/acceptFriend',
-    { requester, requestee },
+    '/api/friending/accept',
+    { session, requesterUsername },
     'acceptFriend'
   ) as Record<string, never>;
 }
@@ -115,15 +115,15 @@ export async function acceptFriend(requester: string, requestee: string): Promis
 /**
  * Rejects and deletes an existing friend request.
  * API Spec: POST /api/Friending/reject
- * Implementation: rejectFriend method expects { requester, requestee }
- * @param requester - The user who sent the friend request
- * @param requestee - The user who received the friend request (and is now rejecting)
+ * Sync expects: { session, requesterUsername }
+ * @param session - The session token for authentication
+ * @param requesterUsername - The username of the user who sent the friend request
  * @returns Empty object on success, throws error on failure
  */
-export async function rejectFriend(requester: string, requestee: string): Promise<Record<string, never>> {
+export async function rejectFriend(session: string, requesterUsername: string): Promise<Record<string, never>> {
   return await apiCall(
-    '/api/Friending/rejectFriend',
-    { requester, requestee },
+    '/api/friending/reject',
+    { session, requesterUsername },
     'rejectFriend'
   ) as Record<string, never>;
 }
