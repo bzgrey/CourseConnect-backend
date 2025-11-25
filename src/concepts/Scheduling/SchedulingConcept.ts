@@ -132,7 +132,7 @@ export default class SchedulingConcept {
    */
   async _getUserSchedule(
     { user }: { user: User },
-  ): Promise<{ event: Event }[]> {
+  ): Promise<{ event: Event }[] | { error: string }[]> {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return [];
@@ -143,8 +143,7 @@ export default class SchedulingConcept {
       // This indicates data inconsistency, which is an exceptional state.
       return [];
     }
-
-    return scheduleDoc.events.map((event) => ({ event }));
+    return scheduleDoc.events.map((eventId) => ({ event: eventId }));
   }
 
   /**

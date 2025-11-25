@@ -13,22 +13,34 @@ import { CourseCatalog, Requesting, Scheduling, Sessioning } from "@concepts";
  * 5. Respond with collected results.
  */
 export const GetUserSchedule: Sync = (
-  { request, session, user, event, name, type, times, results },
+  {
+    request,
+    session,
+    currentUser,
+    targetUser,
+    event,
+    name,
+    type,
+    times,
+    results,
+  },
 ) => ({
   when: actions([
     Requesting.request,
-    { path: "/getUserSchedule", session },
+    { path: "/Scheduling/_getUserSchedule", targetUser, session },
     { request },
   ]),
   where: async (frames) => {
     // Preserve the request ID for the response if queries return empty
     const originalFrame = frames[0];
-
     // 1. Authenticate: Get user from session
-    frames = await frames.query(Sessioning._getUser, { session }, { user });
-
+    frames = await frames.query(Sessioning._getUser, { session }, {
+      currentUser,
+    });
     // 2. Get the list of event IDs for this user
-    frames = await frames.query(Scheduling._getUserSchedule, { user }, {
+    frames = await frames.query(Scheduling._getUserSchedule, {
+      user: targetUser,
+    }, {
       event,
     });
 
@@ -46,7 +58,7 @@ export const GetUserSchedule: Sync = (
     }
 
     // 4. Collect all resulting rows into a single list
-    return frames.collectAs([name, type, times], results);
+    return frames.collectAs([event, name, type, times], results);
   },
   then: actions([
     Requesting.respond,
@@ -71,7 +83,7 @@ export const CompareSchedules: Sync = (
   when: actions([
     Requesting.request,
     // Expect the request body to contain the ID of the user to compare against (user2)
-    { path: "/compareSchedules", session, user2 },
+    { path: "/Scheduling/_compareSchedules", session, user2 },
     { request },
   ]),
   where: async (frames) => {
