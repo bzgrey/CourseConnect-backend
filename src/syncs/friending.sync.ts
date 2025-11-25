@@ -206,7 +206,6 @@ export const RejectFriendQueryErrorResponse: Sync = ({ request, session, request
 export const GetAllIncomingFriendRequestsResponseSuccess: Sync = ({ request, session, user, requester, requesters }) => ({
   when: actions([Requesting.request, { path: "/Friending/_getAllIncomingFriendRequests", session }, { request }]),
   where: async (frames: Frames) => {
-    // Preserve the original frame for the response
     const originalFrame = frames[0];
 
     // Authenticate: Get user from session
@@ -216,16 +215,20 @@ export const GetAllIncomingFriendRequestsResponseSuccess: Sync = ({ request, ses
     }
 
     // Query for incoming friend requests (requests sent TO the user, where user is requestee)
-    // _getAllIncomingFriendRequests finds requests where user is the requestee and returns requester IDs
-    // Returns User[] (array of strings), so we need to manually bind each ID
-    const requesterIds = await Friending._getAllIncomingFriendRequests({ user });
+    // The query returns User[] (primitives), so we call it directly and manually create frames
+    const userValue = frames[0]?.[user];
+    if (!userValue) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [requesters]: [] });
+    }
+
+    const requesterIds = await Friending._getAllIncomingFriendRequests({ user: userValue });
 
     // Handle empty results (no friend requests)
     if (requesterIds.length === 0) {
       return new Frames({ ...originalFrame, [request]: originalFrame[request], [requesters]: [] });
     }
 
-    // Create frames with each requester ID bound, then collect them
+    // Create frames with each requester ID, then collect them
     const requesterFrames = new Frames(...requesterIds.map((id) => ({ ...originalFrame, [requester]: id })));
     return requesterFrames.collectAs([requester], requesters);
   },
@@ -256,7 +259,6 @@ export const GetAllIncomingFriendRequestsResponseError: Sync = ({ request, sessi
 export const GetAllOutgoingFriendRequestsResponseSuccess: Sync = ({ request, session, user, requestee, requestees }) => ({
   when: actions([Requesting.request, { path: "/Friending/_getAllOutgoingFriendRequests", session }, { request }]),
   where: async (frames: Frames) => {
-    // Preserve the original frame for the response
     const originalFrame = frames[0];
 
     // Authenticate: Get user from session
@@ -266,16 +268,20 @@ export const GetAllOutgoingFriendRequestsResponseSuccess: Sync = ({ request, ses
     }
 
     // Query for outgoing friend requests (requests sent BY the user, where user is requester)
-    // _getAllOutgoingFriendRequests finds requests where user is the requester and returns requestee IDs
-    // Returns User[] (array of strings), so we need to manually bind each ID
-    const requesteeIds = await Friending._getAllOutgoingFriendRequests({ user });
+    // The query returns User[] (primitives), so we call it directly and manually create frames
+    const userValue = frames[0]?.[user];
+    if (!userValue) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [requestees]: [] });
+    }
+
+    const requesteeIds = await Friending._getAllOutgoingFriendRequests({ user: userValue });
 
     // Handle empty results (no friend requests)
     if (requesteeIds.length === 0) {
       return new Frames({ ...originalFrame, [request]: originalFrame[request], [requestees]: [] });
     }
 
-    // Create frames with each requestee ID bound, then collect them
+    // Create frames with each requestee ID, then collect them
     const requesteeFrames = new Frames(...requesteeIds.map((id) => ({ ...originalFrame, [requestee]: id })));
     return requesteeFrames.collectAs([requestee], requestees);
   },
