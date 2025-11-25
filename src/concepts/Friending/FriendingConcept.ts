@@ -139,21 +139,21 @@ export default class FriendingConcept {
   }
 
   /**
-   * _getAllIncomingFriendRequests (user:User): (requestee: User)[]
-   * **effects** returns list of requestees for user
+   * _getAllIncomingFriendRequests (user:User): User[]
+   * **effects** returns list of requestees for user (requests where user is the requester)
    */
-  async _getAllIncomingFriendRequests({ user }: { user: User }): Promise<{ requestee: User }[]> {
-    const requests = await this.pendingRequests.find({ requester: user }).toArray();
-    return requests.map((req) => ({ requestee: req.requestee }));
+  async _getAllIncomingFriendRequests({ user }: { user: User }): Promise<User[]> {
+    const requests = await this.pendingRequests.find({ requestee: user }).toArray();
+    return requests.map((req) => req.requester);
   }
 
   /**
-   * _getAllOutgoingFriendRequests (user:User): (requester: User)[]
-   * **effects** returns list of requesters for user
+   * _getAllOutgoingFriendRequests (user:User): User[]
+   * **effects** returns list of requesters for user (requests where user is the requestee)
    */
-  async _getAllOutgoingFriendRequests({ user }: { user: User }): Promise<{ requester: User }[]> {
-    const requests = await this.pendingRequests.find({ requestee: user }).toArray();
-    return requests.map((req) => ({ requester: req.requester }));
+  async _getAllOutgoingFriendRequests({ user }: { user: User }): Promise<User[]> {
+    const requests = await this.pendingRequests.find({ requester: user }).toArray();
+    return requests.map((req) => req.requestee);
   }
 
   /**

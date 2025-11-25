@@ -198,3 +198,103 @@ export const RejectFriendQueryErrorResponse: Sync = ({ request, session, request
   },
   then: actions([Requesting.respond, { request, error: queryError }]),
 });
+
+// ============================================================================
+// Get All Incoming Friend Requests (Query)
+// ============================================================================
+
+export const GetAllIncomingFriendRequestsResponseSuccess: Sync = ({ request, session, user, requester, requesters }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllIncomingFriendRequests", session }, { request }]),
+  where: async (frames: Frames) => {
+    // Preserve the original frame for the response
+    const originalFrame = frames[0];
+
+    // Authenticate: Get user from session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames(); // Invalid session, return empty so this sync doesn't fire
+    }
+
+    // Query for incoming friend requests (requests sent TO the user, where user is requestee)
+    // _getAllIncomingFriendRequests finds requests where user is the requestee and returns requester IDs
+    // Returns User[] (array of strings), so we need to manually bind each ID
+    const requesterIds = await Friending._getAllIncomingFriendRequests({ user });
+
+    // Handle empty results (no friend requests)
+    if (requesterIds.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [requesters]: [] });
+    }
+
+    // Create frames with each requester ID bound, then collect them
+    const requesterFrames = new Frames(...requesterIds.map((id) => ({ ...originalFrame, [requester]: id })));
+    return requesterFrames.collectAs([requester], requesters);
+  },
+  then: actions([Requesting.respond, { request, requesters }]),
+});
+
+export const GetAllIncomingFriendRequestsResponseError: Sync = ({ request, session, user }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllIncomingFriendRequests", session }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Check if session is valid
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request] });
+    }
+
+    // If we get here, session is valid, so this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: "Invalid session" }]),
+});
+
+// ============================================================================
+// Get All Outgoing Friend Requests (Query)
+// ============================================================================
+
+export const GetAllOutgoingFriendRequestsResponseSuccess: Sync = ({ request, session, user, requestee, requestees }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllOutgoingFriendRequests", session }, { request }]),
+  where: async (frames: Frames) => {
+    // Preserve the original frame for the response
+    const originalFrame = frames[0];
+
+    // Authenticate: Get user from session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames(); // Invalid session, return empty so this sync doesn't fire
+    }
+
+    // Query for outgoing friend requests (requests sent BY the user, where user is requester)
+    // _getAllOutgoingFriendRequests finds requests where user is the requester and returns requestee IDs
+    // Returns User[] (array of strings), so we need to manually bind each ID
+    const requesteeIds = await Friending._getAllOutgoingFriendRequests({ user });
+
+    // Handle empty results (no friend requests)
+    if (requesteeIds.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request], [requestees]: [] });
+    }
+
+    // Create frames with each requestee ID bound, then collect them
+    const requesteeFrames = new Frames(...requesteeIds.map((id) => ({ ...originalFrame, [requestee]: id })));
+    return requesteeFrames.collectAs([requestee], requestees);
+  },
+  then: actions([Requesting.respond, { request, requestees }]),
+});
+
+export const GetAllOutgoingFriendRequestsResponseError: Sync = ({ request, session, user }) => ({
+  when: actions([Requesting.request, { path: "/Friending/_getAllOutgoingFriendRequests", session }, { request }]),
+  where: async (frames: Frames) => {
+    const originalFrame = frames[0];
+
+    // Check if session is valid
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, [request]: originalFrame[request] });
+    }
+
+    // If we get here, session is valid, so this sync shouldn't fire
+    return new Frames();
+  },
+  then: actions([Requesting.respond, { request, error: "Invalid session" }]),
+});
