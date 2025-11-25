@@ -113,7 +113,7 @@ export const CompareSchedules: Sync = (
     }
 
     // 4. Collect results
-    return frames.collectAs([name, type, times], results);
+    return frames.collectAs([event, name, type, times], results);
   },
   then: actions([
     Requesting.respond,
