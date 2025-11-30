@@ -1,5 +1,11 @@
 import { actions, Frames, Sync } from "@engine";
-import { Blocking, Grouping, Requesting, Sessioning } from "@concepts";
+import {
+  Blocking,
+  Grouping,
+  Requesting,
+  Scheduling,
+  Sessioning,
+} from "@concepts";
 
 // =============================================================================
 //  Group Creation
@@ -544,4 +550,168 @@ export const GetGroupAdmins: Sync = (
     return frames;
   },
   then: actions([Requesting.respond, { request, admins }]),
+});
+
+/**
+ * Sync: GetMembersInEvents
+ *
+ * Purpose: Allows a user to retrieve a nested mapping from events to groups to users attending those events.
+ * Flow:
+ * 1. Request comes in with a session, groups array, and events array.
+ * 2. Resolve session to user.
+ * 3. For each group, get members.
+ * 4. Filter out members who are blocking the requesting user.
+ * 5. For each remaining member, get their schedule.
+ * 6. Filter to only events in the requested events array.
+ * 7. Build a nested mapping from event -> group -> users that are attending that event in that group.
+ * 8. Respond with the nested mapping.
+ */
+export const GetMembersInEvents: Sync = (
+  {
+    request,
+    session,
+    groups,
+    events,
+    user,
+    group,
+    member,
+    event,
+    result,
+    results,
+  },
+) => ({
+  when: actions([
+    Requesting.request,
+    { path: "/Grouping/_getMembersInEvents", session, groups, events },
+    { request },
+  ]),
+  where: async (frames) => {
+    // Preserve the request ID for the response if queries return empty
+    const originalFrame = frames[0];
+    const requestedGroups = (originalFrame[groups] as unknown[]) || [];
+    const requestedEvents = (originalFrame[events] as unknown[]) || [];
+
+    // Early return if no groups or events provided
+    if (requestedGroups.length === 0 || requestedEvents.length === 0) {
+      const emptyMapping: Record<string, Record<string, unknown[]>> = {};
+      for (const e of requestedEvents) {
+        emptyMapping[String(e)] = {};
+      }
+      return new Frames({ ...originalFrame, [results]: emptyMapping });
+    }
+
+    // 1. Authenticate: Get user from session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames();
+    }
+    const requestingUser = frames[0][user];
+
+    // 2. Expand groups: Create a frame for each group
+    // Only include necessary fields to avoid issues with arrays in frames
+    const groupFrames = new Frames();
+    for (const g of requestedGroups) {
+      groupFrames.push({
+        [request]: originalFrame[request],
+        [session]: originalFrame[session],
+        [group]: g,
+        [user]: requestingUser,
+      });
+    }
+    frames = groupFrames;
+
+    // 3. Get members for each group
+    frames = await frames.query(Grouping._getMembers, { group }, { member });
+
+    if (frames.length === 0) {
+      // No members in any group, return empty mapping
+      const emptyMapping: Record<string, Record<string, unknown[]>> = {};
+      for (const e of requestedEvents) {
+        emptyMapping[String(e)] = {};
+      }
+      return new Frames({ ...originalFrame, [results]: emptyMapping });
+    }
+
+    // 4. Filter out members who are blocking the requesting user
+    frames = await frames.query(Blocking._isUserBlocked, {
+      primaryUser: member,
+      secondaryUser: requestingUser,
+    }, { result });
+    frames = frames.filter((frame) => {
+      const isBlocked = (frame[result] as boolean) ?? false;
+      return !isBlocked;
+    });
+
+    if (frames.length === 0) {
+      // All members are blocking, return empty mapping
+      const emptyMapping: Record<string, Record<string, unknown[]>> = {};
+      for (const e of requestedEvents) {
+        emptyMapping[String(e)] = {};
+      }
+      return new Frames({ ...originalFrame, [results]: emptyMapping });
+    }
+
+    // 5. Get each member's schedule
+    frames = await frames.query(Scheduling._getUserSchedule, { user: member }, {
+      event,
+    });
+
+    // 6. Filter to only events that match the requested events
+    // Convert both sides to strings for reliable comparison
+    const requestedEventStrings = new Set(
+      requestedEvents.map((e) => String(e)),
+    );
+    frames = frames.filter((frame) =>
+      requestedEventStrings.has(String(frame[event]))
+    );
+
+    if (frames.length === 0) {
+      // No members attending requested events, return empty mapping
+      const emptyMapping: Record<string, Record<string, unknown[]>> = {};
+      for (const e of requestedEvents) {
+        emptyMapping[String(e)] = {};
+      }
+      return new Frames({ ...originalFrame, [results]: emptyMapping });
+    }
+
+    // 7. Build nested mapping: event -> group -> users attending that event
+    const eventToGroupToUsers: Record<string, Record<string, Set<unknown>>> =
+      {};
+    for (const frame of frames) {
+      const eventId = String(frame[event]);
+      const groupId = String(frame[group]);
+      const memberId = frame[member];
+
+      if (!eventToGroupToUsers[eventId]) {
+        eventToGroupToUsers[eventId] = {};
+      }
+      if (!eventToGroupToUsers[eventId][groupId]) {
+        eventToGroupToUsers[eventId][groupId] = new Set();
+      }
+      eventToGroupToUsers[eventId][groupId].add(memberId);
+    }
+
+    // Convert Sets to arrays and ensure all requested events are in the mapping
+    const finalMapping: Record<string, Record<string, unknown[]>> = {};
+    for (const e of requestedEvents) {
+      const eventId = String(e);
+      finalMapping[eventId] = {};
+
+      // For each group that has members in this event
+      if (eventToGroupToUsers[eventId]) {
+        for (
+          const [groupId, userIds] of Object.entries(
+            eventToGroupToUsers[eventId],
+          )
+        ) {
+          finalMapping[eventId][groupId] = Array.from(userIds);
+        }
+      }
+    }
+
+    return new Frames({ ...originalFrame, [results]: finalMapping });
+  },
+  then: actions(
+    [Requesting.respond, { request, results }],
+  ),
 });
