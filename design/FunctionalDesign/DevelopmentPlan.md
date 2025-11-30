@@ -18,10 +18,10 @@
 | Preferences Concept        | Beta       | Betsegaw                                 |
 | Blocking Concept           | Beta       | Yabetse                                  |
 | User Schedule Diffs        | Beta       | Benny                                    |
-| Preferencing Frontend      | Beta       | Giani                                    |
+| Preferencing Frontend      | Beta       | Betsegaw                                 |
 | Add Room Numbers           | Beta (New) | Giani                                    |
 | Outgoing Friend Requests   | Beta (New) | Yabetse                                  |
-| Schedule Component Design  | Beta (New) | Betsegaw                                 |
+| Schedule Component Design  | Beta (New) | Yabetse                                  |
 | Course Filtering and Info  | Beta (New) | Betsegaw                                 |
 | Add getFriendsInEvent sync | Beta (New) | Benny                                    |
 | Add Lab Support            | Beta (New) | Giani                                    |
