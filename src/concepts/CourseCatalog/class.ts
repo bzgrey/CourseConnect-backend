@@ -565,7 +565,7 @@ export class Class {
     }
 
     return {
-      name: this.number, // Use course number as name (e.g., "8.05")
+      name: this.number + ":" + this.name, // Use course number as name (e.g., "8.05")
       events,
     };
   }
