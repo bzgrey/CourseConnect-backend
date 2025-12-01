@@ -503,11 +503,12 @@ export class Class {
 
   /**
    * Convert this Class to the format expected by CourseCatalogConcept.defineCourse
-   * @returns Object with name, tags, and events array formatted for defineCourse
+   * @returns Object with name, tags, info, and events array formatted for defineCourse
    */
   toDefineCourseFormat(): {
     name: string;
     tags: string[];
+    info: string;
     events: {
       type: string;
       times: { days: string[]; startTime: string; endTime: string };
@@ -578,9 +579,31 @@ export class Class {
       tags.push("CI-H");
     }
 
+    // Flatten this.description into a formatted string
+    const desc = this.description;
+    const infoParts: string[] = [];
+
+    if (desc.description) {
+      infoParts.push(desc.description);
+    }
+
+    if (desc.inCharge) {
+      infoParts.push(`\nInstructor(s):\n\t${desc.inCharge}`);
+    }
+
+    if (desc.extraUrls && desc.extraUrls.length > 0) {
+      infoParts.push("\nLinks:");
+      desc.extraUrls.forEach((urlObj) => {
+        infoParts.push(`\t${urlObj.label}: ${urlObj.url}`);
+      });
+    }
+
+    const info = infoParts.join("\n");
+
     return {
       name: this.number + ": " + this.name, // Use course number as name (e.g., "8.05")
       tags,
+      info,
       events,
     };
   }
