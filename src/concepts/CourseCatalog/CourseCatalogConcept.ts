@@ -71,27 +71,11 @@ export default class CourseCatalogConcept {
   }
 
   /**
-   * defineCourse (name: String, events: (type: String, times: MeetingTime)[]): (course: Course)
-   *
-   * **requires**: For each meeting time provided, `startTime < endTime`. Course with given name doesn't exist.
-   * **effects**: Creates a new course in the set of Courses with defined lecture and optional recitation and lab times. This is typically an administrative action.
+   * Helper to validate that all event meeting times have startTime < endTime
    */
-  async defineCourse(
-    { name, tags, info, events }: {
-      name: string;
-      tags: string[];
-      info: string;
-      events: { type: string; times: MeetingTime }[];
-    },
-  ): Promise<{ course: Course } | { error: string }> {
-    // Requires: Course with given name doesn't exist
-    const existingCourse = await this.courses.findOne({ name });
-    // if (existingCourse) {
-
-    // return { error: `Course with name '${name}' already exists` };
-    // }
-
-    // Requires: For each meeting time provided, startTime < endTime
+  private validateEventTimes(
+    events: { type: string; times: MeetingTime }[],
+  ): { error: string } | null {
     for (const event of events) {
       if (
         this.timeToMinutes(event.times.startTime) >=
@@ -103,11 +87,21 @@ export default class CourseCatalogConcept {
         };
       }
     }
+    return null;
+  }
 
-    // Effects: Creates a new course and its associated events
-    let newCourseId = freshID() as Course;
-    let newEventDocs: EventDoc[] = [];
-    let newEventIds: Event[] = [];
+  /**
+   * Helper to create a new course and its events
+   */
+  private async createNewCourseAndEvents(
+    name: string,
+    tags: string[],
+    info: string,
+    events: { type: string; times: MeetingTime }[],
+  ): Promise<{ course: Course }> {
+    const newCourseId = freshID() as Course;
+    const newEventDocs: EventDoc[] = [];
+    const newEventIds: Event[] = [];
 
     for (const event of events) {
       const newEventId = freshID() as Event;
@@ -135,6 +129,130 @@ export default class CourseCatalogConcept {
     }
 
     return { course: newCourseId };
+  }
+
+  /**
+   * Helper to update an existing course and its events, preserving event IDs by type
+   */
+  private async updateExistingCourseAndEvents(
+    courseId: Course,
+    tags: string[],
+    info: string,
+    events: { type: string; times: MeetingTime }[],
+    existingEvents: Event[],
+  ): Promise<{ course: Course }> {
+    // Fetch existing events and build map by type
+    const existingEventDocs = await this.events.find({
+      _id: { $in: existingEvents },
+    }).toArray();
+    const existingEventsByType = new Map<string, EventDoc>();
+    for (const eventDoc of existingEventDocs) {
+      existingEventsByType.set(eventDoc.type, eventDoc);
+    }
+
+    // Process new events, reusing IDs where type matches
+    const newEventIds: Event[] = [];
+    const eventsToUpdate: EventDoc[] = [];
+    const eventsToInsert: EventDoc[] = [];
+
+    for (const event of events) {
+      const existingEvent = existingEventsByType.get(event.type);
+
+      if (existingEvent) {
+        // Reuse existing event ID and update its times
+        newEventIds.push(existingEvent._id);
+        eventsToUpdate.push({
+          _id: existingEvent._id,
+          course: courseId,
+          type: event.type,
+          times: event.times,
+        });
+        existingEventsByType.delete(event.type);
+      } else {
+        // Create new event with new ID
+        const newEventId = freshID() as Event;
+        newEventIds.push(newEventId);
+        eventsToInsert.push({
+          _id: newEventId,
+          course: courseId,
+          type: event.type,
+          times: event.times,
+        });
+      }
+    }
+
+    // Delete events that are no longer needed
+    const eventIdsToDelete = Array.from(existingEventsByType.values()).map(
+      (e) => e._id,
+    );
+    if (eventIdsToDelete.length > 0) {
+      await this.events.deleteMany({ _id: { $in: eventIdsToDelete } });
+    }
+
+    // Update existing events
+    for (const eventDoc of eventsToUpdate) {
+      await this.events.updateOne(
+        { _id: eventDoc._id },
+        { $set: { times: eventDoc.times } },
+      );
+    }
+
+    // Insert new events
+    if (eventsToInsert.length > 0) {
+      await this.events.insertMany(eventsToInsert);
+    }
+
+    // Update course document
+    await this.courses.updateOne(
+      { _id: courseId },
+      {
+        $set: {
+          tags,
+          info,
+          events: newEventIds,
+        },
+      },
+    );
+
+    return { course: courseId };
+  }
+
+  /**
+   * defineCourse (name: String, events: (type: String, times: MeetingTime)[]): (course: Course)
+   *
+   * **requires**: For each meeting time provided, `startTime < endTime`. Course with given name doesn't exist.
+   * **effects**: Creates a new course in the set of Courses with defined lecture and optional recitation and lab times. This is typically an administrative action.
+   */
+  async defineCourse(
+    { name, tags, info, events }: {
+      name: string;
+      tags: string[];
+      info: string;
+      events: { type: string; times: MeetingTime }[];
+    },
+  ): Promise<{ course: Course } | { error: string }> {
+    // Requires: For each meeting time provided, startTime < endTime
+    const validationError = this.validateEventTimes(events);
+    if (validationError) {
+      return validationError;
+    }
+
+    // Check if course with given name already exists
+    const existingCourse = await this.courses.findOne({ name });
+
+    if (existingCourse) {
+      // Effects: Updates existing course, preserving event IDs by type
+      return await this.updateExistingCourseAndEvents(
+        existingCourse._id,
+        tags,
+        info,
+        events,
+        existingCourse.events,
+      );
+    } else {
+      // Effects: Creates a new course and its associated events
+      return await this.createNewCourseAndEvents(name, tags, info, events);
+    }
   }
 
   /**

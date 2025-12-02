@@ -25,8 +25,8 @@
 
 **actions**:
 * `defineCourse (name: String, tags: Tag[], info: String, events: (Event, type: String, times: MeetingTime)[]): (course: Course)`
-    * **requires**: For each meeting time provided, `startTime < endTime`.  Course with given name doesn't exist
-    * **effects**: Creates a new course in the set of Courses with defined lecture and optional recitation and lab times. This is typically an administrative action. 
+    * **requires**: For each meeting time provided, `startTime < endTime`.
+    * **effects**: Creates a new course in the set of Courses with defined lecture and optional recitation and lab times. If a course with the given name already exists, updates its tags, info, and events (matching events by type to preserve event IDs where possible). This is typically an administrative action. 
 * removeCourse (course: Course)
 	* requires: course exists
 	* effects: removes course from set of course and each of its events from the set of events
