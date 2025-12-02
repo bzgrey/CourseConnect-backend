@@ -14,23 +14,60 @@
 | Course Info Component      | Alpha  ✅  | Giani                                    |
 | User Profile Page          | Alpha  ✅  | Yabetse                                  |
 | Course Search Component    | Alpha  ✅  | Giani                                    |
-| Grouping Concept           | Beta       | Giani                                    |
-| Preferences Concept        | Beta       | Betsegaw                                 |
-| Blocking Concept           | Beta       | Yabetse                                  |
-| User Schedule Diffs        | Beta       | Benny                                    |
-| Preferencing Frontend      | Beta       | Betsegaw                                 |
-| Add Room Numbers           | Beta (New) | Giani                                    |
-| Outgoing Friend Requests   | Beta (New) | Yabetse                                  |
-| Schedule Component Design  | Beta (New) | Yabetse                                  |
-| Course Filtering and Info  | Beta (New) | Betsegaw                                 |
-| Add getFriendsInEvent sync | Beta (New) | Benny                                    |
-| Add Lab Support            | Beta (New) | Giani                                    |
-| Scheduling   ->   Schedule | Beta (New) | Benny                                    |
-
+| Grouping Concept           | Beta   ✅  | Giani                                    |
+| Preferences Concept        | Beta   ✅  | Betsegaw                                 |
+| Blocking Concept           | Beta   ✅  | Yabetse                                  |
+| User Schedule Diffs        | Beta   ✅  | Benny                                    |
+| Preferencing Frontend      | Beta   ✅  | Betsegaw                                 |
+| Add Room Numbers           | Beta   ✅  | Giani                                    |
+| Outgoing Friend Requests   | Beta   ✅  | Yabetse                                  |
+| Schedule Component Design  | Beta   ✅  | Yabetse                                  |
+| Course Filtering and Info  | Beta   ✅  | Betsegaw                                 |
+| Add getFriendsInEvent sync | Beta   ✅  | Benny                                    |
+| Add Lab Support            | Beta   ✅  | Giani                                    |
+| Task List                  | Testing    | Benny                                    |
+| User 1                     | Testing    | Yabetse                                  |
+| User 2                     | Testing    | Betsegaw                                 |
+| Style Frontend             | Full Demo  | Yabetse                                  |
+| Additional Course Info     | Full Demo  | Betsegaw                                 |
+| Local Store / Performance  | Full Demo  | Giani                                    |
+| Add block _getUserSchedule | Full Demo  | Benny                                    |
+| Full Demo Video            | Full Demo  | Everyone                                 |
+| Design Summary           | Project Report | Benny                                  |
 
 ## Alpha Checkpoint Update
 
 We finished initial implementations of everything in the alpha development plan, as indicated by the checks. Our design changed in that we decided to split up the concept CourseScheduling into CourseCatalog and Scheduling
+
+| Feature / Task             | Checkpoint | Owner                                    |
+| -------------------------- | ---------- | ---------------------------------------- |
+| Scheduling Concept         | Alpha  ✅  | Benny                                    |
+| CourseCataloging           | Alpha  ✅  | Benny                                    |
+| Hydrant Parsing            | Alpha  ✅  | Betsegaw                                 |
+| Friending Concept          | Alpha  ✅  | Yabetse                                  |
+| User Login Page            | Alpha  ✅  | Benny                                    |
+| Schedule Component         | Alpha  ✅  | Betsegaw (w/ dummy data), Benny          |
+| Course Info Component      | Alpha  ✅  | Giani                                    |
+| User Profile Page          | Alpha  ✅  | Yabetse                                  |
+| Course Search Component    | Alpha  ✅  | Giani                                    |
+
+## Beta Checkpoint Update
+
+New backend for frontend syncs, finished everything in development plan, showing out going requests, and including more information for each course. Overall still on track, all going good!
+
+| Feature / Task             | Checkpoint | Owner                                    |
+| -------------------------- | ---------- | ---------------------------------------- |
+| Grouping Concept           | Beta   ✅  | Giani                                    |
+| Preferences Concept        | Beta   ✅  | Betsegaw                                 |
+| Blocking Concept           | Beta   ✅  | Yabetse                                  |
+| User Schedule Diffs        | Beta   ✅  | Benny                                    |
+| Preferencing Frontend      | Beta   ✅  | Betsegaw                                 |
+| Add Room Numbers           | Beta   ✅  | Giani                                    |
+| Outgoing Friend Requests   | Beta   ✅  | Yabetse                                  |
+| Schedule Component Design  | Beta   ✅  | Yabetse                                  |
+| Course Filtering and Info  | Beta   ✅  | Betsegaw                                 |
+| Add getFriendsInEvent sync | Beta   ✅  | Benny                                    |
+| Add Lab Support            | Beta   ✅  | Giani                                    |
 
 ---
 
