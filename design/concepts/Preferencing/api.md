@@ -2,12 +2,9 @@
 
 [@implementation](implementation.md)
 
-# prompt: create api for Preferencing
-# response:
-
 # API Specification: Preferencing Concept
 
-**Purpose:** To allow a user to assign a personal numerical score to a single item at a time, and to query this score.
+**Purpose:** To allow a user to assign personal numerical scores to multiple items, and to query these scores.
 
 ---
 
@@ -15,14 +12,14 @@
 
 ### POST /api/Preferencing/addScore
 
-**Description:** Assigns a score to an item for a user, provided they don't already have one.
+**Description:** Assigns a score to an item for a user.
 
 **Requirements:**
-- The `user` must not currently have an `item` and `score` assigned.
+- The `user` must not have already scored this specific `item`.
 - The `score` must be a valid number.
 
 **Effects:**
-- Assigns the given `item` and `score` to the `user`.
+- Adds a new preference with the given `user`, `item`, and `score`.
 
 **Request Body:**
 ```json
@@ -47,14 +44,14 @@
 ---
 ### POST /api/Preferencing/updateScore
 
-**Description:** Updates the score for a user's currently assigned item.
+**Description:** Updates the score for a user's preference on a specific item.
 
 **Requirements:**
-- The `user` must already have the specified `item` assigned.
+- The `user` must have already scored the specified `item`.
 - The `score` must be a valid number.
 
 **Effects:**
-- Updates the `score` for the `user`'s assigned `item` to the new value.
+- Updates the `score` for the `user`'s preference on this `item` to the new value.
 
 **Request Body:**
 ```json
@@ -79,13 +76,13 @@
 ---
 ### POST /api/Preferencing/removeScore
 
-**Description:** Removes a user's score preference for an item.
+**Description:** Removes a user's score preference for a specific item.
 
 **Requirements:**
-- The `user` must have the specified `item` assigned to them.
+- The `user` must have scored the specified `item`.
 
 **Effects:**
-- Clears the `item` and `score` from the `user`'s record, removing the preference.
+- Removes the preference for this `user` and `item` combination.
 
 **Request Body:**
 ```json
@@ -162,7 +159,7 @@
 ```json
 [
   {
-    "items": "Item[]"
+    "item": "Item"
   }
 ]
 ```

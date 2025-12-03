@@ -403,6 +403,7 @@ export default class CourseCatalogConcept {
    */
   async _getEventInfo({ event }: { event: Event }): Promise<{
     event: Event;
+    course: Course;
     name: string;
     type: string;
     times: MeetingTime;
@@ -422,6 +423,7 @@ export default class CourseCatalogConcept {
       {
         event: eventDoc._id,
         name: courseDoc.name,
+        course: eventDoc.course,
         type: eventDoc.type,
         times: eventDoc.times,
       },

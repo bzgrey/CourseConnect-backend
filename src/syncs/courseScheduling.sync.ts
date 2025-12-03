@@ -1,16 +1,24 @@
 import { actions, Frames, Sync } from "@engine";
-import { CourseCatalog, Requesting, Scheduling, Sessioning } from "@concepts";
+import {
+  CourseCatalog,
+  Preferencing,
+  Requesting,
+  Scheduling,
+  Sessioning,
+} from "@concepts";
 
 /**
  * Sync: GetUserSchedule
  *
- * Purpose: Allows a user to retrieve their own schedule with full course details.
+ * Purpose: Allows a user to retrieve a schedule with full course details and preferences.
+ *
  * Flow:
- * 1. Request comes in with a session.
- * 2. Resolve session to user.
+ * 1. Request comes in with a session and target user.
+ * 2. Resolve session to currentUser.
  * 3. Get event IDs from Scheduling.
  * 4. Get event details from CourseCatalog.
- * 5. Respond with collected results.
+ * 5. Get preference scores from Preferencing (left join - null if no score).
+ * 6. Respond with collected results.
  */
 export const GetUserSchedule: Sync = (
   {
@@ -19,9 +27,11 @@ export const GetUserSchedule: Sync = (
     currentUser,
     targetUser,
     event,
+    course,
     name,
     type,
     times,
+    score,
     results,
   },
 ) => ({
@@ -31,34 +41,78 @@ export const GetUserSchedule: Sync = (
     { request },
   ]),
   where: async (frames) => {
-    // Preserve the request ID for the response if queries return empty
     const originalFrame = frames[0];
+
     // 1. Authenticate: Get user from session
     frames = await frames.query(Sessioning._getUser, { session }, {
       currentUser,
     });
-    // 2. Get the list of event IDs for this user
-    frames = await frames.query(Scheduling._getUserSchedule, {
-      user: targetUser,
+
+    if (frames.length === 0) {
+      return new Frames({
+        ...originalFrame,
+        [results]: { error: "Unauthorized" },
+      });
+    }
+
+    const userFrame = frames[0];
+
+    // 2. Get the list of event IDs for target user
+    frames = await new Frames(userFrame).query(Scheduling._getUserSchedule, {
+      user: originalFrame[targetUser],
     }, {
       event,
     });
 
-    // 3. Hydrate event IDs with details from CourseCatalog
-    // Note: Spec defines `_getEventInfo`
-    frames = await frames.query(CourseCatalog._getEventInfo, { event }, {
+    // 3. Hydrate event IDs with details from CourseCatalog (including course ID)
+    frames = await frames.query(CourseCatalog._getEventInfo, {
+      event,
+    }, {
+      event,
+      course,
       name,
       type,
       times,
     });
+
+    // 4. Left join with preferences - manually preserve frames without scores
+    const augmentedFrames: any[] = [];
+    for (const frame of frames) {
+      const scoreFrames = await new Frames(frame).query(
+        Preferencing._getScore,
+        {
+          user: originalFrame[targetUser],
+          item: frame[course],
+        },
+        { score },
+      );
+
+      if (scoreFrames.length > 0) {
+        // Merge the score into the existing frame
+        augmentedFrames.push({ ...frame, [score]: scoreFrames[0][score] });
+      } else {
+        // No score found
+        augmentedFrames.push({ ...frame, [score]: null });
+      }
+    }
+
+    frames = new Frames(...augmentedFrames);
 
     // Handle empty results (user has no schedule or events not found)
     if (frames.length === 0) {
       return new Frames({ ...originalFrame, [results]: [] });
     }
 
-    // 4. Collect all resulting rows into a single list
-    return frames.collectAs([event, name, type, times], results);
+    // 5. Collect all events into a single array
+    const allEvents = frames.map((frame) => ({
+      event: frame[event],
+      name: frame[name],
+      type: frame[type],
+      times: frame[times],
+      score: frame[score],
+    }));
+
+    return new Frames({ ...originalFrame, [results]: allEvents });
   },
   then: actions([
     Requesting.respond,
@@ -78,7 +132,19 @@ export const GetUserSchedule: Sync = (
  * 5. Respond.
  */
 export const CompareSchedules: Sync = (
-  { request, session, user1, user2, event, name, type, times, results },
+  {
+    request,
+    session,
+    user1,
+    user2,
+    event,
+    course,
+    name,
+    type,
+    times,
+    score,
+    results,
+  },
 ) => ({
   when: actions([
     Requesting.request,
@@ -100,20 +166,54 @@ export const CompareSchedules: Sync = (
       user2,
     }, { event });
 
-    // 3. Hydrate details
-    frames = await frames.query(CourseCatalog._getEventInfo, { event }, {
+    // 3. Hydrate details with course ID
+    frames = await frames.query(CourseCatalog._getEventInfo, {
+      event,
+    }, {
+      course,
       name,
       type,
       times,
     });
+
+    // 4. Left join with preferences for user1 - manually preserve frames without scores
+    const augmentedFrames: any[] = [];
+    for (const frame of frames) {
+      const scoreFrames = await new Frames(frame).query(
+        Preferencing._getScore,
+        {
+          user: originalFrame[user1],
+          item: frame[course],
+        },
+        { score },
+      );
+
+      if (scoreFrames.length > 0) {
+        // Merge the score into the existing frame
+        augmentedFrames.push({ ...frame, [score]: scoreFrames[0][score] });
+      } else {
+        // No score found
+        augmentedFrames.push({ ...frame, [score]: null });
+      }
+    }
+
+    frames = new Frames(...augmentedFrames);
 
     // Handle empty intersections
     if (frames.length === 0) {
       return new Frames({ ...originalFrame, [results]: [] });
     }
 
-    // 4. Collect results
-    return frames.collectAs([event, name, type, times], results);
+    // 5. Collect all events into a single array
+    const allEvents = frames.map((frame) => ({
+      event: frame[event],
+      name: frame[name],
+      type: frame[type],
+      times: frame[times],
+      score: frame[score],
+    }));
+
+    return new Frames({ ...originalFrame, [results]: allEvents });
   },
   then: actions([
     Requesting.respond,

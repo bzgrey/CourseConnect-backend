@@ -26,6 +26,9 @@
 * **`_getUserSchedule(user: User): events: Event[]`**
     *   **requires**: The `user` has a schedule.
     *   **effects**: Returns a set of all events (id's) in the user's schedule
+* **`_getUserScheduleByCourses(user: User): courses: Course[]`**
+    *   **requires**: The `user` has a schedule.
+    *   **effects**: Returns a set of all unique course IDs from events in the user's schedule
 * **`_getScheduleComparison (user1: User, user2: User): events: Event[]`**
     *   **requires**: Both `user1` and `user2` have schedules.
     *   **effects**: Returns the common event id's between the schedules of user1 and user

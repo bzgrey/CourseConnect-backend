@@ -1,24 +1,24 @@
 * **concept**: Preferencing \[User, Item]
 
-* **purpose**: To allow a user to assign a personal numerical score to a single item at a time, and to query this score.
+* **purpose**: To allow a user to assign personal numerical scores to multiple items, and to query these scores.
 
-* **principle**: Each user can assign a score to at most one item at any given time. Assigning a score to an item (either new or existing) replaces any previously held item and score for that user.
+* **principle**: Each user can assign a score to any item. Users can change scores for items they've already scored by calling addScore again with a new score.
 
 * **state**:
   * A set of `Users` with
+    * a set of `Preferences` (references)
+  * A set of `Preferences` with
+    * a `user` of type `User`
     * an `item` of type `Item`
     * a `score` of type `Number`
 
 * **actions**:
   * `addScore (user: User, item: Item, score: Number)`
-    * **requires**: The `user` must not currently have an `item` and `score` assigned. The `score` must be a valid number.
-    * **effects**: Assigns the given `item` and `score` to the `user`.
-  * `updateScore (user: User, item: Item, score: Number)`
-    * **requires**: The `user` must already have the specified `item` assigned. The `score` must be a valid number.
-    * **effects**: Updates the `score` for the `user`'s assigned `item` to the new value.
+    * **requires**: The `score` must be a valid number.
+    * **effects**: If the user has not scored this item, adds a new preference. If the user has already scored this item, updates the score to the new value.
   * `removeScore (user: User, item: Item)`
-    * **requires**: The `user` must have the specified `item` assigned to them.
-    * **effects**: Clears the `item` and `score` from the `user`'s record, removing the preference.
+    * **requires**: The `user` must have scored the specified `item`.
+    * **effects**: Removes the preference for this `user` and `item` combination.
 
 * **queries**:
   * `_getScore (user: User, item: Item): (score: Number)`

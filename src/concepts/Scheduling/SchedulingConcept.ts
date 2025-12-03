@@ -147,6 +147,52 @@ export default class SchedulingConcept {
   }
 
   /**
+   * _getUserScheduleByCourses(user: User): courses: Course[]
+   *
+   * @requires The `user` has a schedule.
+   * @effects Returns a set of all unique course IDs from events in the user's schedule.
+   */
+  async _getUserScheduleByCourses(
+    { user }: { user: User },
+  ): Promise<{ course: ID }[]> {
+    const userDoc = await this.users.findOne({ _id: user });
+    if (!userDoc) {
+      return [];
+    }
+
+    const scheduleDoc = await this.schedules.findOne({ _id: userDoc.schedule });
+    if (!scheduleDoc) {
+      return [];
+    }
+
+    // Get unique courses from events
+    // Assuming events are stored with course information in CourseCatalog
+    // We need to aggregate events to get their parent courses
+    const pipeline = [
+      {
+        $match: {
+          _id: { $in: scheduleDoc.events },
+        },
+      },
+      {
+        $group: {
+          _id: "$course",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          course: "$_id",
+        },
+      },
+    ];
+
+    const eventsCollection = this.db.collection("CourseCatalog.events");
+    const courses = await eventsCollection.aggregate(pipeline).toArray();
+    return courses as { course: ID }[];
+  }
+
+  /**
    * _getScheduleComparison (user1: User, user2: User): events: Event[]
    *
    * @requires Both `user1` and `user2` have schedules.

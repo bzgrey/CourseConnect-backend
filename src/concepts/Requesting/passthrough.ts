@@ -93,4 +93,9 @@ export const exclusions: Array<string> = [
   "/api/Grouping/_isGroupMember",
   "/api/Grouping/_getGroupRequests",
   "/api/Grouping/_getUserRequests",
+  // Preferencing routes
+  "/api/Preferencing/addScore",
+  "/api/Preferencing/_getScore",
+  "/api/Preferencing/removeScore",
+  "/api/Preferencing/_getAllItems",
 ];

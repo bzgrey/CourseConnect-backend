@@ -1,5 +1,6 @@
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
+import { freshID } from "@utils/database.ts";
 
 // Collection prefix
 const PREFIX = "Preferencing" + ".";
@@ -10,25 +11,34 @@ type Item = ID;
 
 /**
  * @concept Preferencing [User, Item]
- * @purpose To allow a user to assign a personal numerical score to a single item at a time, and to query this score.
- * @principle Each user can assign a score to at most one item at any given time. Assigning a score to an item (either new or existing) replaces any previously held item and score for that user.
+ * @purpose To allow a user to assign personal numerical scores to multiple items, and to query these scores.
+ * @principle Each user can assign a score to any item. A user cannot score the same item multiple times, but can score different items.
  */
 
 /**
- * A set of Users with
- *  an item of type Item
- *  a score of type Number
+ * A set of Preferences with user, item, and score
  */
-interface Users {
-  _id: User;
+interface Preference {
+  _id: ID;
+  user: User;
   item: Item;
   score: number;
 }
 
+/**
+ * A set of Users with preferences
+ */
+interface UserDoc {
+  _id: User;
+  preferences: ID[]; // Array of preference IDs
+}
+
 export default class PreferencingConcept {
-  users: Collection<Users>;
+  preferences: Collection<Preference>;
+  users: Collection<UserDoc>;
 
   constructor(private readonly db: Db) {
+    this.preferences = this.db.collection(PREFIX + "preferences");
     this.users = this.db.collection(PREFIX + "users");
   }
 
@@ -37,80 +47,63 @@ export default class PreferencingConcept {
   /**
    * addScore (user: User, item: Item, score: Number)
    *
-   * @requires The `user` must not currently have an `item` and `score` assigned. The `score` must be a valid number.
-   * @effects Assigns the given `item` and `score` to the `user`.
+   * @requires The `score` must be a valid number.
+   * @effects If the user has not scored this item, adds a new preference. If the user has already scored this item, updates the score to the new value.
    */
   async addScore(
     { user, item, score }: { user: User; item: Item; score: number },
   ): Promise<Empty | { error: string }> {
-    const existing = await this.users.findOne({ _id: user });
+    const existing = await this.preferences.findOne({ user, item });
+
     if (existing) {
-      return {
-        error:
-          "User already has a scored item. Use updateScore or removeScore first.",
-      };
-    }
+      // Update existing score
+      await this.preferences.updateOne(
+        { user, item },
+        { $set: { score } },
+      );
+    } else {
+      // Add new preference
+      const preferenceId = freshID();
+      await this.preferences.insertOne({
+        _id: preferenceId,
+        user,
+        item,
+        score,
+      });
 
-    await this.users.insertOne({ _id: user, item, score });
-    return {};
-  }
-
-  /**
-   * updateScore (user: User, item: Item, score: Number)
-   *
-   * @requires The `user` must already have the specified `item` assigned. The `score` must be a valid number.
-   * @effects Updates the `score` for the `user`'s assigned `item` to the new value.
-   */
-  async updateScore(
-    { user, item, score }: { user: User; item: Item; score: number },
-  ): Promise<Empty | { error: string }> {
-    const existing = await this.users.findOne({ _id: user });
-
-    if (!existing) {
-      return { error: "User has no scored item to update." };
-    }
-
-    if (existing.item !== item) {
-      return { error: "User is not scored on the specified item." };
-    }
-
-    const { matchedCount } = await this.users.updateOne({ _id: user }, {
-      $set: { score },
-    });
-
-    if (matchedCount === 0) {
-      // This case should theoretically not be reached due to the checks above, but it's good practice.
-      return { error: "Failed to find the user's score to update." };
+      // Add preference ID to user's preferences array (create user if doesn't exist)
+      await this.users.updateOne(
+        { _id: user },
+        { $push: { preferences: preferenceId } },
+        { upsert: true },
+      );
     }
 
     return {};
-  }
-
-  /**
+  } /**
    * removeScore (user: User, item: Item)
    *
-   * @requires The `user` must have the specified `item` assigned to them.
-   * @effects Clears the `item` and `score` from the `user`'s record, removing the preference.
+   * @requires The `user` must have scored the specified `item`.
+   * @effects Removes the preference for this `user` and `item` combination.
    */
+
   async removeScore(
     { user, item }: { user: User; item: Item },
   ): Promise<Empty | { error: string }> {
-    const existing = await this.users.findOne({ _id: user });
+    const existing = await this.preferences.findOne({ user, item });
 
     if (!existing) {
-      return { error: "User has no scored item to remove." };
+      return { error: "User has not scored this item." };
     }
 
-    if (existing.item !== item) {
-      return { error: "User is not scored on the specified item." };
-    }
+    // Remove preference from preferences collection
+    await this.preferences.deleteOne({ user, item });
 
-    const { deletedCount } = await this.users.deleteOne({ _id: user });
-
-    if (deletedCount === 0) {
-      // This case should also not be reached.
-      return { error: "Failed to find the user's score to remove." };
-    }
+    // Remove preference ID from user's preferences array
+    await this.users.updateOne(
+      { _id: user },
+      { $pull: { preferences: existing._id } },
+    );
 
     return {};
   }
@@ -126,11 +119,12 @@ export default class PreferencingConcept {
   async _getScore(
     { user, item }: { user: User; item: Item },
   ): Promise<{ score: number }[]> {
-    const record = await this.users.findOne({ _id: user, item: item });
-    if (!record) {
+    const preference = await this.preferences.findOne({ user, item });
+    if (!preference) {
       return [];
     }
-    return [{ score: record.score }];
+
+    return [{ score: preference.score }];
   }
 
   /**
@@ -139,14 +133,8 @@ export default class PreferencingConcept {
    * @requires `user` exists
    * @effects list of Item `items` associated with the `user` is returned
    */
-  async _getAllItems({ user }: { user: User }): Promise<{ items: Item[] }[]> {
-    const record = await this.users.findOne({ _id: user });
-    if (!record) {
-      // Per the spec, the user is assumed to exist, but may not have a preference.
-      // In this case, they have an empty list of scored items.
-      return [{ items: [] }];
-    }
-    // If the user has a scored item, return it in a list.
-    return [{ items: [record.item] }];
+  async _getAllItems({ user }: { user: User }): Promise<{ item: Item }[]> {
+    const preferences = await this.preferences.find({ user }).toArray();
+    return preferences.map((pref) => ({ item: pref.item }));
   }
 }
