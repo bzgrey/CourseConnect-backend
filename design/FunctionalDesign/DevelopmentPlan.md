@@ -26,12 +26,17 @@
 | Add getFriendsInEvent sync | Beta   ✅  | Benny                                    |
 | Add Lab Support            | Beta   ✅  | Giani                                    |
 | Task List                  | Testing    | Benny                                    |
+| Create Demo Stories        | Testing    | Benny                                    |
 | User 1                     | Testing    | Yabetse                                  |
 | User 2                     | Testing    | Betsegaw                                 |
 | Style Frontend             | Full Demo  | Yabetse                                  |
 | Additional Course Info     | Full Demo  | Betsegaw                                 |
 | Local Store / Performance  | Full Demo  | Giani                                    |
 | Add block _getUserSchedule | Full Demo  | Benny                                    |
+| Feature Enhance Schedule   | Full Demo  | Giani                                    |
+| Feature Enhance Schedule   | Full Demo  | Benny                                    |
+| User Testing Feature #1    | Full Demo  | Yabetse                                  |
+| User Testing Feature #2    | Full Demo  | Betsegaw                                 |
 | Full Demo Video            | Full Demo  | Everyone                                 |
 | Design Summary           | Project Report | Benny                                  |
 
