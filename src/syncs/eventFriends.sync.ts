@@ -40,6 +40,8 @@ export const GetEventFriends: Sync = (
   where: async (frames) => {
     // Preserve the request ID for the response if queries return empty
     const originalFrame = frames[0];
+    // Extract events from original frame to ensure it's available even if lost through queries
+    const requestedEvents = (originalFrame[events] as unknown[]) || [];
 
     // 1. Authenticate: Get user from session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
@@ -57,13 +59,25 @@ export const GetEventFriends: Sync = (
       event,
     });
     // 5. Filter to only those friends events that match the requested events
-    frames = frames.filter((frame) =>
-      (frame[events] as unknown[]).includes(frame[event])
-    );
+    // Use the extracted requestedEvents instead of frame[events] to avoid undefined errors
+    frames = frames.filter((frame) => {
+      const friendEvent = frame[event];
+
+      // Defensive check: ensure friendEvent exists and requestedEvents is an array
+      if (!Array.isArray(requestedEvents) || friendEvent === undefined) {
+        return false;
+      }
+
+      return requestedEvents.includes(friendEvent);
+    });
 
     // Handle empty results (user has no schedule or events not found)
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, [friends]: [] });
+      const emptyResults = requestedEvents.map((eventId) => ({
+        event: eventId,
+        friends: [],
+      }));
+      return new Frames({ ...originalFrame, [results]: emptyResults });
     }
 
     frames = frames.collectAs([friend, username], friends);
