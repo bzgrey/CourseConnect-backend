@@ -35,15 +35,15 @@ After creating "SciGroup" and removing themselves as admin, we observed that:
 
 # Flaws / Opportunities
 
-## 1. Duplicate usage of green to indicate "Likely" preference and event block on calendar view
+## 1. Duplicate usage of green to indicate "Likely" preference and event block on calendar view 
 *   **Issue:** Confuses users into thinking the event block color corresponds to the "Likely" preference.
 *   **Fix:** Change event block color.
 
-## 2. Preference selection of course above lecture/recitation times
+## 2. Preference selection of course above lecture/recitation times 
 *   **Issue:** Made it seem like you select a preference first.
 *   **Fix:** Move preference selection *below* lecture/recitation times **OR** only display preferences after the selection of some event associated with a course.
 
-## 3. Unable to compare a group member and friend's schedule in the calendar view
+## 3. Unable to compare a group member and friend's schedule in the calendar view 
 *   **Why:** There wasn't an option in the "Groups & Friends" dropdown to select "All," which displays all group members and friends together.
 *   **Fix:** Add an "All" option.
 
