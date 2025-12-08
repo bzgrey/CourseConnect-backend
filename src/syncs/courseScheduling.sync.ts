@@ -1,11 +1,13 @@
 import { actions, Frames, Sync } from "@engine";
 import {
+  Blocking,
   CourseCatalog,
   Preferencing,
   Requesting,
   Scheduling,
   Sessioning,
 } from "@concepts";
+import { privateEncrypt } from "node:crypto";
 
 /**
  * Sync: GetUserSchedule
@@ -15,10 +17,11 @@ import {
  * Flow:
  * 1. Request comes in with a session and target user.
  * 2. Resolve session to currentUser.
- * 3. Get event IDs from Scheduling.
- * 4. Get event details from CourseCatalog.
- * 5. Get preference scores from Preferencing (left join - null if no score).
- * 6. Respond with collected results.
+ * 3. Check if currentUser is blocked by targetUser.
+ * 4. Get event IDs from Scheduling.
+ * 5. Get event details from CourseCatalog.
+ * 6. Get preference scores from Preferencing (left join - null if no score).
+ * 7. Respond with collected results.
  */
 export const GetUserSchedule: Sync = (
   {
@@ -26,6 +29,7 @@ export const GetUserSchedule: Sync = (
     session,
     currentUser,
     targetUser,
+    isBlocked,
     event,
     course,
     name,
@@ -45,7 +49,7 @@ export const GetUserSchedule: Sync = (
 
     // 1. Authenticate: Get user from session
     frames = await frames.query(Sessioning._getUser, { session }, {
-      currentUser,
+      user: currentUser,
     });
 
     if (frames.length === 0) {
@@ -57,14 +61,29 @@ export const GetUserSchedule: Sync = (
 
     const userFrame = frames[0];
 
-    // 2. Get the list of event IDs for target user
+    // 2. Check if currentUser is blocked by targetUser
+    frames = await frames.query(Blocking._isUserBlocked, {
+      primaryUser: targetUser,
+      secondaryUser: currentUser,
+    }, { result: isBlocked });
+
+    frames = frames.filter((frame) => !frame[isBlocked]);
+
+    if (frames.length === 0) {
+      return new Frames({
+        ...originalFrame,
+        [results]: { error: "Access denied: You are blocked by this user." },
+      });
+    }
+
+    // 3. Get the list of event IDs for target user
     frames = await new Frames(userFrame).query(Scheduling._getUserSchedule, {
       user: originalFrame[targetUser],
     }, {
       event,
     });
 
-    // 3. Hydrate event IDs with details from CourseCatalog (including course ID)
+    // 4. Hydrate event IDs with details from CourseCatalog (including course ID)
     frames = await frames.query(CourseCatalog._getEventInfo, {
       event,
     }, {
@@ -75,7 +94,7 @@ export const GetUserSchedule: Sync = (
       times,
     });
 
-    // 4. Left join with preferences - manually preserve frames without scores
+    // 5. Left join with preferences - manually preserve frames without scores
     const augmentedFrames: any[] = [];
     for (const frame of frames) {
       const scoreFrames = await new Frames(frame).query(
@@ -103,7 +122,7 @@ export const GetUserSchedule: Sync = (
       return new Frames({ ...originalFrame, [results]: [] });
     }
 
-    // 5. Collect all events into a single array
+    // 6. Collect all events into a single array
     const allEvents = frames.map((frame) => ({
       event: frame[event],
       name: frame[name],
