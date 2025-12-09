@@ -58,6 +58,7 @@ export const exclusions: Array<string> = [
   "/api/Scheduling/scheduleEvent",
   "/api/Scheduling/unscheduleEvent",
   "/api/Scheduling/_getUserSchedule",
+  "/api/Scheduling/_getUserScheduleByCourses",
   "/api/Scheduling/_getScheduleComparison",
   "/api/CourseCatalog/timeToMinutes",
   "/api/CourseCatalog/defineCourse",

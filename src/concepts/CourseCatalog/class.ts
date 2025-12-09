@@ -572,12 +572,53 @@ export class Class {
     if (classFlags.hass) {
       tags.push("HASS");
     }
+    if (classFlags.hassH) {
+      tags.push("HASS-H");
+    }
+    if (classFlags.hassA) {
+      tags.push("HASS-A");
+    }
+    if (classFlags.hassS) {
+      tags.push("HASS-S");
+    }
     if (classFlags.cim) {
       tags.push("CI-M");
     }
-    if (classFlags.cih || classFlags.cihw) {
+    if (classFlags.cih) {
       tags.push("CI-H");
     }
+    if (classFlags.cihw) {
+      tags.push("CI-HW");
+    }
+    if (classFlags.notcih) {
+      tags.push("Not CI-H");
+    }
+    if (classFlags.nofinal) {
+      tags.push("No Final");
+    }
+    if (classFlags.nopreq) {
+      tags.push("No Prereq");
+    }
+    if (classFlags.under) {
+      tags.push("U");
+    }
+    if (classFlags.grad) {
+      tags.push("G");
+    }
+    if (classFlags.le9units) {
+      tags.push("<= 9 Units");
+    }
+    if (classFlags.rest) {
+      tags.push("REST");
+    }
+    if (classFlags.Lab) {
+      tags.push("Lab");
+    }
+
+    // Add ratings and hours
+    const evals = this.evals;
+    tags.push(`Rating: ${evals.rating}`);
+    tags.push(`Hours: ${evals.hours}`);
 
     // Flatten this.description into a formatted string
     const desc = this.description;
