@@ -23,8 +23,11 @@
 - [Final Demo](https://drive.google.com/file/d/1WCw_xCrTQyIHVvh186w2o-j_v4gASfdG/view?usp=sharing)
 
 
-## Weekly Progress
+## Mentoring Meeting Records
 https://docs.google.com/document/d/1fBkw4vPdtD2IAGbrnvp8nLchiBuFZC35CkJKPKTtbkM/edit?usp=sharing
 
-## Project Report
-- [Project report](project-report.md)
+## Design Summary
+[designSummary](designSummary.md)
+
+## Reflection 
+[Reflections](Reflections.md)
