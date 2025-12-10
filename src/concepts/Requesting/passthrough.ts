@@ -64,6 +64,9 @@ export const exclusions: Array<string> = [
   "/api/CourseCatalog/defineCourse",
   "/api/CourseCatalog/removeAllCourses",
   "/api/CourseCatalog/removeCourse",
+  "/api/CourseCatalog/validateEventTimes",
+  "/api/CourseCatalog/createNewCourseAndEvents",
+  "/api/CourseCatalog/updateExistingCourseAndEvents",
   // Friending routes handled by syncs
   "/api/Friending/requestFriend",
   "/api/Friending/acceptFriend",
@@ -73,6 +76,7 @@ export const exclusions: Array<string> = [
   "/api/Friending/_getAllOutgoingFriendRequests",
   "/api/Friending/_getAllFriends",
   "/api/Friending/_areTheyFriends",
+  "/api/Friending/_canonicalOrder",
   // Blocking routes handled by syncs
   "/api/Blocking/blockUser",
   "/api/Blocking/unblockUser",
