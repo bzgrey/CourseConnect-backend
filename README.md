@@ -1,4 +1,49 @@
-# Maverick Design README
+# CourseConnect Backend
+
+A backend service for CourseConnect - a platform designed to help students connect and collaborate on course scheduling.
+
+## Getting Started
+
+### Prerequisites
+
+- [Deno](https://deno.land/) runtime
+- MongoDB instance
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/bzgrey/CourseConnect-backend.git
+   cd CourseConnect-backend
+   ```
+
+2. Configure your environment (if needed)
+
+### Running the Application
+
+```bash
+deno run start
+```
+
+## Project Structure
+
+- `src/` - Source code
+  - `concepts/` - Core concept implementations
+  - `syncs/` - Synchronization logic
+  - `engine/` - Backend engine
+  - `utils/` - Utility functions
+- `design/` - Design documentation
+- `scrapers/` - Course data scrapers
+- `public/` - Public assets and data files
+
+## Tech Stack
+
+- Deno
+- TypeScript
+- MongoDB
+---
+
+# Course Design Documentation (Maverick Design)
 
 ## Assignments
 
@@ -21,7 +66,6 @@
 
 ## Final Demo
 - [Final Demo](https://drive.google.com/file/d/1WCw_xCrTQyIHVvh186w2o-j_v4gASfdG/view?usp=sharing)
-
 
 ## Weekly Progress
 https://docs.google.com/document/d/1fBkw4vPdtD2IAGbrnvp8nLchiBuFZC35CkJKPKTtbkM/edit?usp=sharing
